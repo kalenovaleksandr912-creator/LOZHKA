@@ -1,0 +1,229 @@
+.segment-control {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  min-height: 44px;
+  padding: 5px;
+  border-radius: 18px;
+  background: var(--surface-2);
+}
+
+.segment-control button {
+  min-width: 0;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 780;
+  cursor: pointer;
+}
+
+.segment-control .is-active {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text);
+}
+
+.calendar-view,
+.calendar-day,
+.calendar-list-group {
+  display: grid;
+  gap: 14px;
+}
+
+.calendar-view[hidden] {
+  display: none;
+}
+
+.week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.week-strip button {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  min-width: 0;
+  min-height: 78px;
+  padding: 10px 4px 8px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--surface-2);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.week-strip span,
+.week-strip small {
+  font-size: 11px;
+  font-weight: 780;
+  line-height: 1;
+}
+
+.week-strip strong {
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.week-strip small {
+  display: inline-grid;
+  place-items: center;
+  min-width: 21px;
+  height: 21px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+}
+
+.week-strip .is-active {
+  background: var(--blue);
+  color: #eaf8ff;
+}
+
+.week-strip .is-active strong,
+.week-strip .is-active small {
+  color: #fff;
+}
+
+.week-strip .is-active small {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.month-weekdays,
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.month-weekdays span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 780;
+  line-height: 1;
+  text-align: center;
+}
+
+.month-grid button {
+  display: grid;
+  align-content: space-between;
+  justify-items: start;
+  min-width: 0;
+  min-height: 58px;
+  padding: 8px 7px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.month-grid strong {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.month-grid span {
+  display: flex;
+  gap: 3px;
+  align-self: end;
+}
+
+.month-grid i {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--blue);
+}
+
+.month-grid i:nth-child(2) {
+  background: var(--peach);
+}
+
+.month-grid i:nth-child(3) {
+  background: var(--lavender);
+}
+
+.month-grid .is-muted {
+  color: var(--muted-2);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.month-grid .is-today {
+  border-color: rgba(88, 174, 222, 0.5);
+}
+
+.month-grid .is-active {
+  background: var(--blue);
+  color: #fff;
+}
+
+.month-grid .is-active i {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.month-preview,
+.day-focus {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 17px;
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(88, 174, 222, 0.16), transparent 66%),
+    var(--surface-2);
+}
+
+.month-preview div,
+.day-focus div {
+  min-width: 0;
+}
+
+.month-preview strong,
+.day-focus h2 {
+  display: block;
+  margin: 0;
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1.06;
+}
+
+.month-preview span,
+.day-focus span,
+.day-focus p {
+  display: block;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.month-preview span {
+  margin-top: 5px;
+}
+
+.day-focus h2 {
+  margin: 5px 0 7px;
+  font-size: 32px;
+}
+
+.day-focus svg {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  color: #9bd8ff;
+}
+
+.calendar-list-group h4 {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 780;
+  line-height: 1.2;
+}

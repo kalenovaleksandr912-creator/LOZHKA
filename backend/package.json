@@ -1,0 +1,27 @@
+{
+  "name": "kamspace-backend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:seed": "prisma db seed",
+    "check": "node --check src/server.js && node --check src/app.js && node --check src/routes/today.js && node --check src/routes/tasks.js && node --check src/routes/calendar.js && node --check src/routes/menu.js && node --check src/routes/shopping.js && node --check src/routes/people.js && node --check src/routes/stats.js && node --check prisma/seed.js"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.2",
+    "@prisma/client": "^6.1.0",
+    "dotenv": "^16.4.7",
+    "fastify": "^5.2.1"
+  },
+  "devDependencies": {
+    "prisma": "^6.1.0"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  }
+}

@@ -1,0 +1,295 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SpaceRole {
+  OWNER
+  MEMBER
+}
+
+enum TaskStatus {
+  ACTIVE
+  DONE
+}
+
+enum TaskAssigneeType {
+  USER
+  SHARED
+  UNASSIGNED
+}
+
+enum TaskCategory {
+  HOME
+  PRODUCTS
+  HEALTH
+  ERRAND
+  OTHER
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  DESSERT
+  SNACK
+}
+
+enum ShoppingCategory {
+  PRODUCTS
+  HOUSEHOLD
+  HOME
+  OTHER
+}
+
+enum ShoppingStatus {
+  ACTIVE
+  DONE
+}
+
+enum ShoppingSource {
+  MANUAL
+  MENU
+}
+
+enum OperationType {
+  TASK_CREATED
+  TASK_COMPLETED
+  EVENT_CREATED
+  SHOPPING_CREATED
+  SHOPPING_COMPLETED
+  DISH_CREATED
+  MENU_PLANNED
+  PERSON_CREATED
+  IMPORTANT_DATE_CREATED
+  DAILY_PHOTO_ADDED
+}
+
+model User {
+  id             String             @id @default(cuid())
+  email          String             @unique
+  name           String
+  avatarInitials String?
+  createdAt      DateTime           @default(now())
+  memberships    SpaceMember[]
+  createdTasks   Task[]             @relation("TaskCreatedBy")
+  assignedTasks  Task[]             @relation("TaskAssignee")
+  completedTasks Task[]             @relation("TaskCompletedBy")
+  createdEvents  Event[]            @relation("EventCreatedBy")
+  createdDishes  Dish[]             @relation("DishCreatedBy")
+  createdMenu    MenuPlanItem[]     @relation("MenuCreatedBy")
+  createdShopping ShoppingItem[]     @relation("ShoppingCreatedBy")
+  dailyPhotos    DailyPhoto[]
+  operationLogs  OperationLog[]
+}
+
+model Space {
+  id                    String             @id @default(cuid())
+  inviteCode            String?            @unique
+  relationshipStartDate DateTime?          @db.Date
+  weddingDate           DateTime?          @db.Date
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  memberships           SpaceMember[]
+  tasks                 Task[]
+  events                Event[]
+  dishes                Dish[]
+  menuPlanItems         MenuPlanItem[]
+  shoppingItems         ShoppingItem[]
+  people                Person[]
+  importantDates        ImportantDate[]
+  dailyPhotoPrompts     DailyPhotoPrompt[]
+  operationLogs         OperationLog[]
+}
+
+model SpaceMember {
+  id        String    @id @default(cuid())
+  space     Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  spaceId   String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  role      SpaceRole @default(MEMBER)
+  color     String?
+  joinedAt  DateTime  @default(now())
+
+  @@unique([spaceId, userId])
+}
+
+model Task {
+  id             String            @id @default(cuid())
+  space          Space             @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  spaceId        String
+  title          String
+  details        String?
+  status         TaskStatus        @default(ACTIVE)
+  category       TaskCategory      @default(OTHER)
+  assigneeType   TaskAssigneeType  @default(UNASSIGNED)
+  assigneeUser   User?             @relation("TaskAssignee", fields: [assigneeUserId], references: [id])
+  assigneeUserId String?
+  deadline       DateTime?         @db.Date
+  createdBy      User?             @relation("TaskCreatedBy", fields: [createdById], references: [id])
+  createdById    String?
+  completedBy    User?             @relation("TaskCompletedBy", fields: [completedById], references: [id])
+  completedById  String?
+  completedAt    DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  deletedAt      DateTime?
+
+  @@index([spaceId, deadline])
+  @@index([spaceId, status])
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  space       Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  spaceId     String
+  title       String
+  date        DateTime  @db.Date
+  time        String?
+  createdBy   User?     @relation("EventCreatedBy", fields: [createdById], references: [id])
+  createdById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@index([spaceId, date])
+}
+
+model Dish {
+  id          String           @id @default(cuid())
+  space       Space            @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  spaceId     String
+  title       String
+  mealType    MealType
+  createdBy   User?            @relation("DishCreatedBy", fields: [createdById], references: [id])
+  createdById String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+  ingredients DishIngredient[]
+  planItems   MenuPlanItem[]
+
+  @@index([spaceId, mealType])
+}
+
+model DishIngredient {
+  id     String @id @default(cuid())
+  dish   Dish   @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  dishId String
+  name   String
+  amount String?
+}
+
+model MenuPlanItem {
+  id          String         @id @default(cuid())
+  space       Space          @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  spaceId     String
+  dish        Dish           @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  dishId      String
+  date        DateTime       @db.Date
+  mealType    MealType
+  createdBy   User?          @relation("MenuCreatedBy", fields: [createdById], references: [id])
+  createdById String?
+  createdAt   DateTime       @default(now())
+  deletedAt   DateTime?
+  shopping    ShoppingItem[]
+
+  @@index([spaceId, date])
+}
+
+model ShoppingItem {
+  id               String            @id @default(cuid())
+  space            Space             @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  spaceId          String
+  title            String
+  amount           String?
+  note             String?
+  category         ShoppingCategory  @default(OTHER)
+  shoppingDate     DateTime?         @db.Date
+  status           ShoppingStatus    @default(ACTIVE)
+  source           ShoppingSource    @default(MANUAL)
+  sourceMenuPlan   MenuPlanItem?     @relation(fields: [sourceMenuPlanId], references: [id])
+  sourceMenuPlanId String?
+  createdBy        User?             @relation("ShoppingCreatedBy", fields: [createdById], references: [id])
+  createdById      String?
+  completedAt      DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  deletedAt        DateTime?
+
+  @@index([spaceId, shoppingDate])
+  @@index([spaceId, status])
+}
+
+model Person {
+  id        String    @id @default(cuid())
+  space     Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  spaceId   String
+  fullName  String
+  birthday  DateTime? @db.Date
+  note      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([spaceId])
+}
+
+model ImportantDate {
+  id        String    @id @default(cuid())
+  space     Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  spaceId   String
+  title     String
+  date      DateTime  @db.Date
+  note      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([spaceId, date])
+}
+
+model DailyPhotoPrompt {
+  id        String       @id @default(cuid())
+  space     Space        @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  spaceId   String
+  date      DateTime     @db.Date
+  prompt    String
+  createdAt DateTime     @default(now())
+  photos    DailyPhoto[]
+
+  @@unique([spaceId, date])
+}
+
+model DailyPhoto {
+  id        String           @id @default(cuid())
+  prompt    DailyPhotoPrompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  promptId  String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  imageUrl  String
+  caption   String?
+  createdAt DateTime         @default(now())
+
+  @@unique([promptId, userId])
+}
+
+model OperationLog {
+  id         String        @id @default(cuid())
+  space      Space         @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  spaceId    String
+  user       User?         @relation(fields: [userId], references: [id])
+  userId     String?
+  type       OperationType
+  entityType String
+  entityId   String
+  occurredAt DateTime      @default(now())
+
+  @@index([spaceId, occurredAt])
+  @@index([spaceId, type])
+}

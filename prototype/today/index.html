@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>KAMSpace - Today</title>
+    <link rel="stylesheet" href="./styles.css?v=5" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="./app.js?v=5" defer></script>
+  </head>
+  <body>
+    <main class="app-shell" aria-label="KAMSpace">
+      <section class="app-page is-active" data-page="today" aria-label="Сегодня">
+        <header class="today-topbar" aria-label="Дата и быстрые действия">
+          <div>
+            <p>Понедельник</p>
+            <h1>24 августа</h1>
+          </div>
+          <div class="today-actions">
+            <button class="add-button" id="openQuickAdd" type="button" aria-label="Быстро добавить">
+              <span aria-hidden="true">+</span>
+            </button>
+            <button class="avatar-button" type="button" aria-label="Профиль Александр">Ал</button>
+          </div>
+        </header>
+
+      <section class="daily-carousel" aria-label="Главные карточки дня">
+        <div class="carousel-track" id="carouselTrack">
+          <article class="spotlight-card card-peach">
+            <div class="spotlight-copy">
+              <span>Фото дня</span>
+              <h2>Сфотографируйся с тем, что подняло настроение</h2>
+              <p>Твоё фото ещё не добавлено.</p>
+            </div>
+            <div class="photo-art" aria-hidden="true">
+              <i data-lucide="camera"></i>
+            </div>
+          </article>
+
+          <article class="spotlight-card card-green">
+            <div class="spotlight-copy">
+              <span>Завтра</span>
+              <h2>09:00 врач, 2 задачи и паста на ужин</h2>
+              <p>Можно подготовить покупки сегодня вечером.</p>
+            </div>
+            <div class="tomorrow-art" aria-hidden="true">
+              <i data-lucide="calendar-days"></i>
+            </div>
+          </article>
+
+          <article class="spotlight-card card-lavender">
+            <div class="spotlight-copy">
+              <span>Дни рождения</span>
+              <h2>Через 3 дня день рождения Анны</h2>
+              <p>Подарок можно продумать заранее.</p>
+            </div>
+            <div class="date-art" aria-hidden="true">
+              <i data-lucide="heart"></i>
+            </div>
+          </article>
+        </div>
+
+        <div class="carousel-dots" id="carouselDots" aria-hidden="true">
+          <span class="is-active"></span>
+          <span></span>
+          <span></span>
+        </div>
+      </section>
+
+        <section class="today-feed" aria-label="Информация на сегодня">
+        <div class="feed-heading">
+          <h2>Сегодня</h2>
+          <p>Короткая сводка дня</p>
+        </div>
+
+        <section class="feed-section" aria-labelledby="tasksTitle">
+          <div class="section-title">
+            <div>
+              <p>Задачи</p>
+              <h3 id="tasksTitle">3 активные</h3>
+            </div>
+            <a href="#" aria-label="Открыть задачи">Все</a>
+          </div>
+
+          <label class="task-row">
+            <input type="checkbox" />
+            <span>
+              <strong>Забрать заказ</strong>
+              <small>Александр · до 18:00</small>
+            </span>
+          </label>
+
+          <label class="task-row">
+            <input type="checkbox" />
+            <span>
+              <strong>Оплатить интернет</strong>
+              <small>Общее · без точного времени</small>
+            </span>
+          </label>
+
+          <label class="task-row">
+            <input type="checkbox" />
+            <span>
+              <strong>Проверить продукты на завтра</strong>
+              <small>Настя · меню</small>
+            </span>
+          </label>
+        </section>
+
+        <section class="feed-section" aria-labelledby="eventsTitle">
+          <div class="section-title">
+            <div>
+              <p>События</p>
+              <h3 id="eventsTitle">2 в календаре</h3>
+            </div>
+            <a href="#" aria-label="Открыть календарь">Неделя</a>
+          </div>
+
+          <div class="timeline-item">
+            <time>09:00</time>
+            <span>
+              <strong>Стоматолог</strong>
+              <small>30 минут на дорогу</small>
+            </span>
+          </div>
+
+          <div class="timeline-item">
+            <time>20:30</time>
+            <span>
+              <strong>Вечер без дел</strong>
+              <small>Оставить свободным</small>
+            </span>
+          </div>
+        </section>
+
+        <section class="feed-section menu-section" aria-labelledby="menuTitle">
+          <div class="section-title">
+            <div>
+              <p>Сегодня едим</p>
+              <h3 id="menuTitle">Ужин уже запланирован</h3>
+            </div>
+            <a href="#" aria-label="Открыть меню">План</a>
+          </div>
+
+          <div class="meal-row">
+            <i data-lucide="sunrise" aria-hidden="true"></i>
+            <span>
+              <strong>Завтрак</strong>
+              <small>Омлет, кофе</small>
+            </span>
+          </div>
+
+          <div class="meal-row">
+            <i data-lucide="utensils" aria-hidden="true"></i>
+            <span>
+              <strong>Ужин</strong>
+              <small>Курица, картофель, салат</small>
+            </span>
+          </div>
+        </section>
+
+        <section class="feed-section shopping-section" aria-labelledby="shoppingTitle">
+          <div class="section-title">
+            <div>
+              <p>Покупки</p>
+              <h3 id="shoppingTitle">4 позиции</h3>
+            </div>
+            <a href="#" aria-label="Открыть покупки">Список</a>
+          </div>
+
+          <label class="shopping-row">
+            <input type="checkbox" checked />
+            <span>Молоко</span>
+          </label>
+          <label class="shopping-row">
+            <input type="checkbox" />
+            <span>Яйца</span>
+          </label>
+          <label class="shopping-row">
+            <input type="checkbox" />
+            <span>Хлеб</span>
+          </label>
+          <label class="shopping-row">
+            <input type="checkbox" />
+            <span>Сыр для пасты</span>
+          </label>
+        </section>
+
+        <section class="feed-section us-section" aria-labelledby="usTitle">
+          <div class="section-title">
+            <div>
+              <p>Мы</p>
+              <h3 id="usTitle">657 дней вместе</h3>
+            </div>
+            <a href="#" aria-label="Открыть раздел Мы">Открыть</a>
+          </div>
+
+          <div class="soft-note">
+            <i data-lucide="sparkles" aria-hidden="true"></i>
+            <span>За август закрыто 18 задач и запланировано 9 домашних ужинов.</span>
+          </div>
+        </section>
+        </section>
+      </section>
+
+      <section class="app-page" data-page="tasks" aria-label="Задачи" hidden>
+        <section class="page-hero">
+          <div>
+            <p>Рабочий список</p>
+            <h1>Задачи</h1>
+          </div>
+          <button class="add-button" type="button" aria-label="Создать задачу">
+            <span aria-hidden="true">+</span>
+          </button>
+        </section>
+
+        <div class="summary-strip" aria-label="Сводка задач">
+          <article>
+            <strong>7</strong>
+            <span>активных</span>
+          </article>
+          <article>
+            <strong>3</strong>
+            <span>сегодня</span>
+          </article>
+          <article>
+            <strong>2</strong>
+            <span>общие</span>
+          </article>
+        </div>
+
+        <section class="filter-block" aria-label="Фильтры задач">
+          <div class="chip-row">
+            <button class="chip is-active" type="button">Все</button>
+            <button class="chip" type="button">Александр</button>
+            <button class="chip" type="button">Настя</button>
+            <button class="chip" type="button">Общие</button>
+          </div>
+          <div class="chip-row compact">
+            <button class="chip is-soft-active" type="button">Сегодня</button>
+            <button class="chip" type="button">Предстоящие</button>
+            <button class="chip" type="button">Без срока</button>
+            <button class="chip" type="button">Выполненные</button>
+          </div>
+        </section>
+
+        <section class="task-board" aria-labelledby="activeTasksTitle">
+          <div class="section-title">
+            <div>
+              <h3 id="activeTasksTitle">Сегодня и ближайшее</h3>
+            </div>
+          </div>
+
+          <article class="task-card assignee-me priority-today">
+            <label class="task-check">
+              <input type="checkbox" />
+              <span>
+                <strong>Забрать заказ</strong>
+                <small>До 18:00 · Дом</small>
+              </span>
+            </label>
+            <div class="meta-row">
+              <span>Александр</span>
+              <span>Сегодня</span>
+            </div>
+          </article>
+
+          <article class="task-card assignee-shared">
+            <label class="task-check">
+              <input type="checkbox" />
+              <span>
+                <strong>Оплатить интернет</strong>
+                <small>Без точного времени · Быт</small>
+              </span>
+            </label>
+            <div class="meta-row">
+              <span>Общее</span>
+              <span>Сегодня</span>
+            </div>
+          </article>
+
+          <article class="task-card assignee-her">
+            <label class="task-check">
+              <input type="checkbox" />
+              <span>
+                <strong>Проверить продукты на завтра</strong>
+                <small>Связано с меню · Еда</small>
+              </span>
+            </label>
+            <div class="meta-row">
+              <span>Настя</span>
+              <span>Сегодня</span>
+            </div>
+          </article>
+
+          <article class="task-card assignee-me muted-card">
+            <label class="task-check">
+              <input type="checkbox" checked />
+              <span>
+                <strong>Записать размеры полки</strong>
+                <small>Выполнено утром</small>
+              </span>
+            </label>
+            <div class="meta-row">
+              <span>Александр</span>
+              <span>Выполнено</span>
+            </div>
+          </article>
+        </section>
+      </section>
+
+      <section class="app-page" data-page="calendar" aria-label="Календарь" hidden>
+        <section class="page-hero">
+          <div>
+            <p id="calendarModeLabel">Неделя</p>
+            <h1>Календарь</h1>
+          </div>
+          <button class="add-button" type="button" aria-label="Добавить в календарь">
+            <span aria-hidden="true">+</span>
+          </button>
+        </section>
+
+        <div class="segment-control" aria-label="Вид календаря">
+          <button type="button" data-calendar-view="month">Месяц</button>
+          <button class="is-active" type="button" data-calendar-view="week">Неделя</button>
+          <button type="button" data-calendar-view="day">День</button>
+          <button type="button" data-calendar-view="list">Список</button>
+        </div>
+
+        <section class="calendar-view" data-calendar-view="month" aria-labelledby="monthTitle" hidden>
+          <div class="section-title">
+            <div>
+              <p>Месяц</p>
+              <h3 id="monthTitle">Август 2026</h3>
+            </div>
+            <a href="#" aria-label="Следующий месяц">Дальше</a>
+          </div>
+
+          <div class="month-weekdays" aria-hidden="true">
+            <span>Пн</span>
+            <span>Вт</span>
+            <span>Ср</span>
+            <span>Чт</span>
+            <span>Пт</span>
+            <span>Сб</span>
+            <span>Вс</span>
+          </div>
+
+          <div class="month-grid" aria-label="Август 2026">
+            <button class="is-muted" type="button"><strong>27</strong></button>
+            <button class="is-muted" type="button"><strong>28</strong></button>
+            <button class="is-muted" type="button"><strong>29</strong></button>
+            <button class="is-muted" type="button"><strong>30</strong></button>
+            <button class="is-muted" type="button"><strong>31</strong></button>
+            <button type="button"><strong>1</strong></button>
+            <button type="button"><strong>2</strong></button>
+            <button type="button"><strong>3</strong></button>
+            <button type="button"><strong>4</strong></button>
+            <button type="button"><strong>5</strong></button>
+            <button type="button"><strong>6</strong></button>
+            <button type="button"><strong>7</strong></button>
+            <button type="button"><strong>8</strong></button>
+            <button type="button"><strong>9</strong></button>
+            <button type="button"><strong>10</strong></button>
+            <button type="button"><strong>11</strong></button>
+            <button type="button"><strong>12</strong></button>
+            <button type="button"><strong>13</strong></button>
+            <button type="button"><strong>14</strong></button>
+            <button type="button"><strong>15</strong></button>
+            <button type="button"><strong>16</strong></button>
+            <button type="button"><strong>17</strong></button>
+            <button type="button"><strong>18</strong></button>
+            <button type="button"><strong>19</strong></button>
+            <button type="button"><strong>20</strong></button>
+            <button type="button"><strong>21</strong></button>
+            <button type="button"><strong>22</strong></button>
+            <button type="button"><strong>23</strong></button>
+            <button class="has-items is-today" type="button">
+              <strong>24</strong>
+              <span><i></i><i></i><i></i></span>
+            </button>
+            <button class="has-items" type="button">
+              <strong>25</strong>
+              <span><i></i><i></i></span>
+            </button>
+            <button class="has-items is-active" type="button">
+              <strong>26</strong>
+              <span><i></i><i></i><i></i></span>
+            </button>
+            <button class="has-items" type="button">
+              <strong>27</strong>
+              <span><i></i></span>
+            </button>
+            <button class="has-items" type="button">
+              <strong>28</strong>
+              <span><i></i><i></i></span>
+            </button>
+            <button type="button"><strong>29</strong></button>
+            <button type="button"><strong>30</strong></button>
+            <button type="button"><strong>31</strong></button>
+            <button class="is-muted" type="button"><strong>1</strong></button>
+            <button class="is-muted" type="button"><strong>2</strong></button>
+            <button class="is-muted" type="button"><strong>3</strong></button>
+            <button class="is-muted" type="button"><strong>4</strong></button>
+            <button class="is-muted" type="button"><strong>5</strong></button>
+            <button class="is-muted" type="button"><strong>6</strong></button>
+          </div>
+
+          <div class="month-preview">
+            <strong>26 августа</strong>
+            <span>7 объектов: врач, задача, ужин, покупки и ближайшая дата.</span>
+          </div>
+        </section>
+
+        <section class="calendar-view is-active" data-calendar-view="week" aria-labelledby="weekTitle">
+          <section class="week-strip" aria-label="Дни недели">
+            <button type="button">
+              <span>Пн</span>
+              <strong>24</strong>
+              <small>5</small>
+            </button>
+            <button type="button">
+              <span>Вт</span>
+              <strong>25</strong>
+              <small>3</small>
+            </button>
+            <button class="is-active" type="button">
+              <span>Ср</span>
+              <strong>26</strong>
+              <small>7</small>
+            </button>
+            <button type="button">
+              <span>Чт</span>
+              <strong>27</strong>
+              <small>2</small>
+            </button>
+            <button type="button">
+              <span>Пт</span>
+              <strong>28</strong>
+              <small>4</small>
+            </button>
+            <button type="button">
+              <span>Сб</span>
+              <strong>29</strong>
+              <small>1</small>
+            </button>
+            <button type="button">
+              <span>Вс</span>
+              <strong>30</strong>
+              <small>0</small>
+            </button>
+          </section>
+
+          <section class="calendar-day" aria-labelledby="weekTitle">
+            <div class="section-title">
+              <div>
+                <p>Среда</p>
+                <h3 id="weekTitle">26 августа</h3>
+              </div>
+              <a href="#" aria-label="Открыть день">День</a>
+            </div>
+
+            <article class="agenda-card event-kind">
+              <time>09:00</time>
+              <div>
+                <strong>Врач</strong>
+                <small>Обычное событие</small>
+              </div>
+            </article>
+
+            <article class="agenda-card task-kind">
+              <time>12:00</time>
+              <div>
+                <strong>Забрать заказ</strong>
+                <small>Задача с дедлайном</small>
+              </div>
+            </article>
+
+            <article class="agenda-card menu-kind">
+              <time>Ужин</time>
+              <div>
+                <strong>Паста с сыром</strong>
+                <small>Меню на дату</small>
+              </div>
+            </article>
+
+            <article class="agenda-card shopping-kind">
+              <time>Список</time>
+              <div>
+                <strong>Покупки: 4 позиции</strong>
+                <small>Молоко, яйца, хлеб, сыр</small>
+              </div>
+            </article>
+
+            <article class="agenda-card date-kind">
+              <time>Дата</time>
+              <div>
+                <strong>День рождения Анны</strong>
+                <small>Из раздела Люди</small>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <section class="calendar-view" data-calendar-view="day" aria-labelledby="dayTitle" hidden>
+          <div class="day-focus">
+            <div>
+              <p>Среда</p>
+              <h2 id="dayTitle">26 августа</h2>
+              <span>7 объектов на день</span>
+            </div>
+            <i data-lucide="calendar-days" aria-hidden="true"></i>
+          </div>
+
+          <section class="calendar-day day-timeline" aria-label="День 26 августа">
+            <article class="agenda-card event-kind">
+              <time>09:00</time>
+              <div>
+                <strong>Врач</strong>
+                <small>Событие · напомнить утром</small>
+              </div>
+            </article>
+            <article class="agenda-card task-kind">
+              <time>12:00</time>
+              <div>
+                <strong>Забрать заказ</strong>
+                <small>Задача · Александр</small>
+              </div>
+            </article>
+            <article class="agenda-card shopping-kind">
+              <time>18:00</time>
+              <div>
+                <strong>Покупки к ужину</strong>
+                <small>4 позиции · список на сегодня</small>
+              </div>
+            </article>
+            <article class="agenda-card menu-kind">
+              <time>20:00</time>
+              <div>
+                <strong>Паста с сыром</strong>
+                <small>Ужин · меню</small>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <section class="calendar-view" data-calendar-view="list" aria-labelledby="listTitle" hidden>
+          <div class="section-title">
+            <div>
+              <p>Ближайшее</p>
+              <h3 id="listTitle">Список событий</h3>
+            </div>
+          </div>
+
+          <section class="calendar-list-group" aria-labelledby="listTodayTitle">
+            <h4 id="listTodayTitle">24 августа, сегодня</h4>
+            <article class="agenda-card task-kind">
+              <time>18:00</time>
+              <div>
+                <strong>Забрать заказ</strong>
+                <small>Задача · Александр</small>
+              </div>
+            </article>
+            <article class="agenda-card menu-kind">
+              <time>Ужин</time>
+              <div>
+                <strong>Курица, картофель, салат</strong>
+                <small>Меню</small>
+              </div>
+            </article>
+          </section>
+
+          <section class="calendar-list-group" aria-labelledby="listTomorrowTitle">
+            <h4 id="listTomorrowTitle">25 августа, завтра</h4>
+            <article class="agenda-card event-kind">
+              <time>09:00</time>
+              <div>
+                <strong>Врач</strong>
+                <small>Событие</small>
+              </div>
+            </article>
+            <article class="agenda-card shopping-kind">
+              <time>Список</time>
+              <div>
+                <strong>Покупки к пасте</strong>
+                <small>4 позиции</small>
+              </div>
+            </article>
+          </section>
+
+          <section class="calendar-list-group" aria-labelledby="listLaterTitle">
+            <h4 id="listLaterTitle">28 августа</h4>
+            <article class="agenda-card date-kind">
+              <time>Дата</time>
+              <div>
+                <strong>День рождения Анны</strong>
+                <small>Из раздела Люди</small>
+              </div>
+            </article>
+          </section>
+        </section>
+      </section>
+
+      <section class="app-page" data-page="more" aria-label="Ещё" hidden>
+        <section class="page-hero">
+          <div>
+            <p>Разделы</p>
+            <h1>Ещё</h1>
+          </div>
+        </section>
+
+        <section class="more-group" aria-labelledby="homeGroupTitle">
+          <div class="section-title">
+            <div>
+              <p>Быт</p>
+              <h3 id="homeGroupTitle">Меню и покупки</h3>
+            </div>
+          </div>
+
+          <button class="more-row" type="button">
+            <span class="row-icon warm"><i data-lucide="utensils" aria-hidden="true"></i></span>
+            <span>
+              <strong>Меню</strong>
+              <small>План, блюда, покупки</small>
+            </span>
+            <i data-lucide="chevron-right" aria-hidden="true"></i>
+          </button>
+
+          <button class="more-row" type="button">
+            <span class="row-icon green"><i data-lucide="shopping-bag" aria-hidden="true"></i></span>
+            <span>
+              <strong>Покупки</strong>
+              <small>Сегодня, предстоящие, без даты</small>
+            </span>
+            <i data-lucide="chevron-right" aria-hidden="true"></i>
+          </button>
+        </section>
+
+        <section class="more-group" aria-labelledby="usGroupTitle">
+          <div class="section-title">
+            <div>
+              <p>Мы</p>
+              <h3 id="usGroupTitle">Совместная история</h3>
+            </div>
+          </div>
+
+          <button class="more-row" type="button">
+            <span class="row-icon lavender"><i data-lucide="bar-chart-3" aria-hidden="true"></i></span>
+            <span>
+              <strong>Статистика</strong>
+              <small>657 дней вместе, 18 задач за август</small>
+            </span>
+            <i data-lucide="chevron-right" aria-hidden="true"></i>
+          </button>
+
+          <button class="more-row" type="button">
+            <span class="row-icon blue"><i data-lucide="users" aria-hidden="true"></i></span>
+            <span>
+              <strong>Люди</strong>
+              <small>Дни рождения и важные люди</small>
+            </span>
+            <i data-lucide="chevron-right" aria-hidden="true"></i>
+          </button>
+
+          <button class="more-row" type="button">
+            <span class="row-icon rose"><i data-lucide="heart" aria-hidden="true"></i></span>
+            <span>
+              <strong>Наши даты</strong>
+              <small>Годовщины и личные события</small>
+            </span>
+            <i data-lucide="chevron-right" aria-hidden="true"></i>
+          </button>
+
+          <button class="more-row" type="button">
+            <span class="row-icon warm"><i data-lucide="image" aria-hidden="true"></i></span>
+            <span>
+              <strong>Фотоархив</strong>
+              <small>Фото дня по датам</small>
+            </span>
+            <i data-lucide="chevron-right" aria-hidden="true"></i>
+          </button>
+        </section>
+
+        <section class="more-group" aria-labelledby="systemGroupTitle">
+          <div class="section-title">
+            <div>
+              <p>Система</p>
+              <h3 id="systemGroupTitle">Настройки</h3>
+            </div>
+          </div>
+
+          <button class="more-row" type="button">
+            <span class="row-icon neutral"><i data-lucide="settings" aria-hidden="true"></i></span>
+            <span>
+              <strong>Настройки</strong>
+              <small>Профиль, тема, уведомления, корзина</small>
+            </span>
+            <i data-lucide="chevron-right" aria-hidden="true"></i>
+          </button>
+        </section>
+      </section>
+
+      <nav class="bottom-nav" aria-label="Основная навигация">
+        <button class="nav-item is-active" type="button" data-page="today" aria-label="Сегодня" aria-current="page">
+          <i data-lucide="home" aria-hidden="true"></i>
+          <span>Сегодня</span>
+        </button>
+        <button class="nav-item" type="button" data-page="tasks" aria-label="Задачи">
+          <i data-lucide="check-square" aria-hidden="true"></i>
+          <span>Задачи</span>
+        </button>
+        <button class="nav-item" type="button" data-page="calendar" aria-label="Календарь">
+          <i data-lucide="calendar" aria-hidden="true"></i>
+          <span>Календарь</span>
+        </button>
+        <button class="nav-item" type="button" data-page="more" aria-label="Ещё">
+          <i data-lucide="grid-2x2" aria-hidden="true"></i>
+          <span>Ещё</span>
+        </button>
+      </nav>
+
+      <div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
+      <section class="quick-sheet" id="quickSheet" aria-labelledby="quickSheetTitle" hidden>
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="sheet-title">
+          <h2 id="quickSheetTitle">Добавить на сегодня</h2>
+          <button class="icon-button" id="closeQuickAdd" type="button" aria-label="Закрыть">
+            <i data-lucide="x" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="quick-actions">
+          <button type="button">
+            <i data-lucide="check-square" aria-hidden="true"></i>
+            <span>Новая задача</span>
+          </button>
+          <button type="button">
+            <i data-lucide="calendar-plus" aria-hidden="true"></i>
+            <span>Новое событие</span>
+          </button>
+          <button type="button">
+            <i data-lucide="shopping-bag" aria-hidden="true"></i>
+            <span>Покупка</span>
+          </button>
+          <button type="button">
+            <i data-lucide="utensils" aria-hidden="true"></i>
+            <span>Блюдо</span>
+          </button>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

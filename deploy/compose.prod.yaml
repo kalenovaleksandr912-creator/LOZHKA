@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kamspace
+      POSTGRES_USER: kamspace
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kamspace -d kamspace"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://kamspace:${POSTGRES_PASSWORD}@postgres:5432/kamspace?schema=public
+      DEFAULT_SPACE_ID: demo-space
+      DEFAULT_USER_ID: demo-alex
+      FRONTEND_ORIGIN: http://200.165.229.186
+      HOST: 0.0.0.0
+      PORT: 4000
+    ports:
+      - "127.0.0.1:4000:4000"
+
+volumes:
+  postgres-data:

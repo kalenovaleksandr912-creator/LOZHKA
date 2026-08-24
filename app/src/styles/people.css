@@ -1,0 +1,182 @@
+.app-page[data-page="people"] {
+  gap: 16px;
+}
+
+.people-summary {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 10px;
+}
+
+.people-summary article {
+  min-width: 0;
+  min-height: 94px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface-2);
+}
+
+.people-summary span,
+.people-summary small {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 760;
+  line-height: 1.2;
+}
+
+.people-summary strong {
+  display: block;
+  margin: 8px 0 4px;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 25px;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.people-list {
+  display: grid;
+  gap: 10px;
+}
+
+.person-card {
+  display: grid;
+  gap: 13px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--surface-2);
+}
+
+.person-card.tone-rose {
+  background:
+    linear-gradient(135deg, rgba(255, 91, 143, 0.15), transparent 66%),
+    var(--surface-2);
+}
+
+.person-card.tone-warm {
+  background:
+    linear-gradient(135deg, rgba(255, 159, 104, 0.16), transparent 66%),
+    var(--surface-2);
+}
+
+.person-card.tone-blue {
+  background:
+    linear-gradient(135deg, rgba(88, 174, 222, 0.16), transparent 66%),
+    var(--surface-2);
+}
+
+.person-card.tone-lavender {
+  background:
+    linear-gradient(135deg, rgba(168, 165, 255, 0.16), transparent 66%),
+    var(--surface-2);
+}
+
+.person-card header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 13px;
+  align-items: center;
+}
+
+.person-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.person-card header div,
+.person-date span {
+  min-width: 0;
+}
+
+.person-card header strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 850;
+  line-height: 1.12;
+}
+
+.person-card header small,
+.person-date small {
+  display: block;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.person-date {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 11px;
+  align-items: center;
+  min-height: 62px;
+  padding: 12px;
+  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.person-date > svg {
+  width: 22px;
+  height: 22px;
+  color: #ffacc9;
+}
+
+.person-date strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.16;
+}
+
+.person-card p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 610;
+  line-height: 1.38;
+}
+
+.person-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.person-tags em {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 730;
+  line-height: 1;
+}
+
+@media (max-width: 360px) {
+  .people-summary {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,92 @@
+.section-title {
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.section-title h3 {
+  margin-top: 3px;
+  font-size: 18px;
+  line-height: 1.16;
+}
+
+.section-title a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.agenda-card {
+  display: grid;
+  grid-template-columns: 66px 1fr;
+  gap: 12px;
+  align-items: center;
+  min-height: 72px;
+  padding: 13px;
+  border-radius: 20px;
+  background: var(--surface-2);
+}
+
+.agenda-card time {
+  display: inline-grid;
+  place-items: center;
+  min-height: 42px;
+  border-radius: 14px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 820;
+  line-height: 1;
+}
+
+.agenda-card div {
+  min-width: 0;
+}
+
+.agenda-card strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 780;
+  line-height: 1.2;
+}
+
+.agenda-card small {
+  display: block;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.event-kind time {
+  background: rgba(88, 174, 222, 0.18);
+  color: #97d9ff;
+}
+
+.task-kind time {
+  background: rgba(168, 165, 255, 0.17);
+  color: #c7c5ff;
+}
+
+.menu-kind time {
+  background: rgba(255, 159, 104, 0.18);
+  color: #ffc09b;
+}
+
+.shopping-kind time {
+  background: rgba(72, 197, 138, 0.16);
+  color: #9ff0c8;
+}
+
+.date-kind time {
+  background: rgba(255, 91, 143, 0.16);
+  color: #ffacc9;
+}
