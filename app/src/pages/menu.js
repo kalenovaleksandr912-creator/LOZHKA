@@ -1,5 +1,5 @@
-import { menuCategories } from "../data/mock-data.js?v=12";
-import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=12";
+import { menuCategories } from "../data/mock-data.js?v=13";
+import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=13";
 
 function renderDish(dish) {
   return `

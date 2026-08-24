@@ -1,6 +1,6 @@
-import { carouselCards, dailyPhoto, meals, shopping, tasks as mockTasks, today, todayEvents } from "../data/mock-data.js?v=12";
-import { agendaCard, escapeHtml, icon, pageShell } from "../components/html.js?v=12";
-import { toViewTasks } from "../lib/task-view.js?v=12";
+import { carouselCards, dailyPhoto, meals, shopping, tasks as mockTasks, today, todayEvents } from "../data/mock-data.js?v=13";
+import { agendaCard, escapeHtml, icon, pageShell } from "../components/html.js?v=13";
+import { toViewTasks } from "../lib/task-view.js?v=13";
 
 function todaySectionHeader({ id, title, subtitle, action, actionLabel, targetPage }) {
   const actionControl = targetPage
@@ -202,7 +202,7 @@ export function renderTodayPage() {
           <button class="add-button" id="openQuickAdd" type="button" aria-label="Быстро добавить">
             <span aria-hidden="true">+</span>
           </button>
-          <button class="avatar-button" type="button" aria-label="Профиль Александр">Ал</button>
+          <button class="avatar-button" type="button" data-profile-open aria-label="Профиль Александр">Ал</button>
         </div>
       </header>
 

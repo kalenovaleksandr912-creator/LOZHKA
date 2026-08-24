@@ -1,14 +1,14 @@
-import { renderBottomNav, renderQuickSheet } from "./components/layout.js?v=12";
-import { renderCalendarPage } from "./pages/calendar.js?v=12";
-import { renderMenuPage } from "./pages/menu.js?v=12";
-import { renderMorePage } from "./pages/more.js?v=12";
-import { renderPeoplePage } from "./pages/people.js?v=12";
-import { renderShoppingPage } from "./pages/shopping.js?v=12";
-import { renderStatsPage } from "./pages/stats.js?v=12";
-import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=12";
-import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=12";
-import { createTask, fetchTasks, updateTaskCompletion } from "./lib/api.js?v=12";
-import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=12";
+import { renderBottomNav, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=13";
+import { renderCalendarPage } from "./pages/calendar.js?v=13";
+import { renderMenuPage } from "./pages/menu.js?v=13";
+import { renderMorePage } from "./pages/more.js?v=13";
+import { renderPeoplePage } from "./pages/people.js?v=13";
+import { renderShoppingPage } from "./pages/shopping.js?v=13";
+import { renderStatsPage } from "./pages/stats.js?v=13";
+import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=13";
+import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=13";
+import { createTask, fetchTasks, updateTaskCompletion } from "./lib/api.js?v=13";
+import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=13";
 
 const app = document.getElementById("app");
 
@@ -23,6 +23,7 @@ app.innerHTML = `
   ${renderPeoplePage()}
   ${renderBottomNav()}
   ${renderQuickSheet()}
+  ${renderProfileCard()}
 `;
 
 const navItems = Array.from(document.querySelectorAll(".nav-item"));
@@ -47,7 +48,12 @@ const dailyPhotoOverlay = document.getElementById("dailyPhotoOverlay");
 const dailyPhotoInput = document.getElementById("dailyPhotoInput");
 const openCameraButton = document.querySelector("[data-open-camera]");
 const photoCloseButtons = Array.from(document.querySelectorAll("[data-photo-close]"));
+const profileSheet = document.getElementById("profileSheet");
+const profileBackdrop = document.getElementById("profileBackdrop");
+const profileOpenButtons = Array.from(document.querySelectorAll("[data-profile-open]"));
+const profileCloseButtons = Array.from(document.querySelectorAll("[data-profile-close]"));
 let lastSheetTrigger = document.getElementById("openQuickAdd");
+let lastProfileTrigger = null;
 let taskState = [];
 const secondaryPages = new Set(["menu", "shopping", "stats", "people"]);
 
@@ -105,6 +111,20 @@ function setDailyPhotoOpen(isOpen) {
     dailyPhotoOverlay.querySelector("[data-photo-close]")?.focus();
   } else {
     document.querySelector('[data-card-action="daily-photo"]')?.focus();
+  }
+}
+
+function setProfileOpen(isOpen) {
+  if (!profileSheet || !profileBackdrop) return;
+
+  profileSheet.hidden = !isOpen;
+  profileBackdrop.hidden = !isOpen;
+  document.body.style.overflow = isOpen ? "hidden" : "";
+
+  if (isOpen) {
+    profileSheet.querySelector("[data-profile-close]")?.focus();
+  } else if (lastProfileTrigger) {
+    lastProfileTrigger.focus();
   }
 }
 
@@ -279,6 +299,15 @@ addButtons.forEach((button) => {
   });
 });
 
+profileOpenButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    lastProfileTrigger = button;
+    setProfileOpen(true);
+  });
+});
+profileCloseButtons.forEach((button) => {
+  button.addEventListener("click", () => setProfileOpen(false));
+});
 closeQuickAdd?.addEventListener("click", () => setSheetOpen(false));
 sheetBackdrop?.addEventListener("click", () => setSheetOpen(false));
 backQuickAdd?.addEventListener("click", () => showQuickSheetView("menu"));
@@ -371,6 +400,10 @@ document.addEventListener("keydown", (event) => {
 
   if (event.key === "Escape" && dailyPhotoOverlay && !dailyPhotoOverlay.hidden) {
     setDailyPhotoOpen(false);
+  }
+
+  if (event.key === "Escape" && profileSheet && !profileSheet.hidden) {
+    setProfileOpen(false);
   }
 });
 

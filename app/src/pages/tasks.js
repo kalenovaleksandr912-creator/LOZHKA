@@ -1,6 +1,6 @@
-import { tasks as mockTasks } from "../data/mock-data.js?v=12";
-import { escapeHtml, pageShell, sectionTitle } from "../components/html.js?v=12";
-import { toViewTasks } from "../lib/task-view.js?v=12";
+import { tasks as mockTasks } from "../data/mock-data.js?v=13";
+import { escapeHtml, pageShell, sectionTitle } from "../components/html.js?v=13";
+import { toViewTasks } from "../lib/task-view.js?v=13";
 
 const ownerClass = {
   me: "assignee-me",

@@ -1,4 +1,4 @@
-import { icon } from "./html.js?v=12";
+import { icon } from "./html.js?v=13";
 
 export function renderBottomNav() {
   const items = [
@@ -142,6 +142,65 @@ export function renderQuickSheet() {
         <p class="form-status" aria-live="polite"></p>
       </form>
 
+    </section>
+  `;
+}
+
+export function renderProfileCard() {
+  return `
+    <div class="profile-backdrop" id="profileBackdrop" data-profile-close hidden></div>
+    <section class="profile-sheet" id="profileSheet" aria-labelledby="profileTitle" hidden>
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="sheet-title">
+        <h2 id="profileTitle">Профиль</h2>
+        <button class="icon-button" type="button" data-profile-close aria-label="Закрыть профиль">
+          ${icon("x")}
+        </button>
+      </div>
+
+      <article class="profile-card">
+        <div class="profile-main">
+          <span class="profile-avatar">Ал</span>
+          <div>
+            <p>LOZHKA</p>
+            <h3>Александр</h3>
+            <span>В паре с Сашей</span>
+          </div>
+        </div>
+
+        <div class="profile-stats" aria-label="Сводка профиля">
+          <span><strong>657</strong><small>дней вместе</small></span>
+          <span><strong>3</strong><small>активные задачи</small></span>
+          <span><strong>1</strong><small>фото сегодня</small></span>
+        </div>
+      </article>
+
+      <div class="profile-actions">
+        <button type="button">
+          <span class="row-icon blue">${icon("user")}</span>
+          <span>
+            <strong>Личные данные</strong>
+            <small>Имя, аватар и роль</small>
+          </span>
+          ${icon("chevron-right")}
+        </button>
+        <button type="button">
+          <span class="row-icon rose">${icon("heart")}</span>
+          <span>
+            <strong>Наши даты</strong>
+            <small>Годовщины и важные события</small>
+          </span>
+          ${icon("chevron-right")}
+        </button>
+        <button type="button">
+          <span class="row-icon green">${icon("bell")}</span>
+          <span>
+            <strong>Уведомления</strong>
+            <small>Задачи, покупки и календарь</small>
+          </span>
+          ${icon("chevron-right")}
+        </button>
+      </div>
     </section>
   `;
 }
