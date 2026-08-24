@@ -1,12 +1,12 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: kamspace-postgres
+    container_name: lozhka-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: kamspace
-      POSTGRES_USER: kamspace
-      POSTGRES_PASSWORD: kamspace
+      POSTGRES_DB: lozhka
+      POSTGRES_USER: lozhka
+      POSTGRES_PASSWORD: lozhka
     ports:
       - "5432:5432"
     volumes:

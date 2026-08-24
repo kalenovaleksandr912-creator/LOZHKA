@@ -1,6 +1,6 @@
-# KAMSpace Backend
+# LOZHKA Backend
 
-Backend foundation for KAMSpace.
+Backend foundation for LOZHKA.
 
 Stack:
 
@@ -28,7 +28,7 @@ Copy-Item .env.example .env
 For a local PostgreSQL database:
 
 ```text
-postgresql://kamspace:kamspace@localhost:5432/kamspace?schema=public
+postgresql://lozhka:lozhka@localhost:5432/lozhka?schema=public
 ```
 
 Supabase or another hosted PostgreSQL URL will also work.

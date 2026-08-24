@@ -1,6 +1,6 @@
-# KAMSpace Frontend Prototype
+# LOZHKA Frontend Prototype
 
-This is the structured frontend prototype for KAMSpace.
+This is the structured frontend prototype for LOZHKA.
 
 It intentionally has no backend and no build step yet. The app runs as static files through a local HTTP server.
 

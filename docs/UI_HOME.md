@@ -31,7 +31,7 @@ The interface should feel close to a personal daily app, not like a corporate da
 
 The top part of the home screen should keep the idea of horizontally scrollable blocks.
 
-In KAMSpace these blocks should not be generic feature cards. They should show current daily information.
+In LOZHKA these blocks should not be generic feature cards. They should show current daily information.
 
 Possible first carousel cards:
 
@@ -53,7 +53,7 @@ There should be 4 main items:
 - Calendar;
 - More.
 
-The current reference has 2 visible items. KAMSpace needs 4 because this matches `UX_FLOW.md`.
+The current reference has 2 visible items. LOZHKA needs 4 because this matches `UX_FLOW.md`.
 
 ---
 
@@ -70,7 +70,7 @@ Remove feature-grid cards from the start screen:
 - Schedule;
 - Recipes.
 
-KAMSpace should not show a catalog of modules on the main screen.
+LOZHKA should not show a catalog of modules on the main screen.
 
 The main screen is `Today`, so it should answer:
 

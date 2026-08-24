@@ -38,7 +38,7 @@ async function main() {
   await prisma.space.create({
     data: {
       id: spaceId,
-      inviteCode: "KAM-DEMO",
+      inviteCode: "LOZHKA-DEMO",
       relationshipStartDate: date("2024-11-06"),
       weddingDate: date("2025-08-16"),
       memberships: {

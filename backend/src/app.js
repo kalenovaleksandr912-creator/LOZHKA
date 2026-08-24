@@ -20,7 +20,7 @@ export async function buildApp(options = {}) {
 
   app.get("/health", async () => ({
     ok: true,
-    service: "kamspace-backend",
+    service: "lozhka-backend",
   }));
 
   await app.register(todayRoutes, { prefix: "/api" });
