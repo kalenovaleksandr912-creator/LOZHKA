@@ -1,12 +1,14 @@
-import { renderBottomNav, renderQuickSheet } from "./components/layout.js?v=11";
-import { renderCalendarPage } from "./pages/calendar.js?v=11";
-import { renderMenuPage } from "./pages/menu.js?v=11";
-import { renderMorePage } from "./pages/more.js?v=11";
-import { renderPeoplePage } from "./pages/people.js?v=11";
-import { renderShoppingPage } from "./pages/shopping.js?v=11";
-import { renderStatsPage } from "./pages/stats.js?v=11";
-import { renderTasksPage } from "./pages/tasks.js?v=11";
-import { renderTodayPage } from "./pages/today.js?v=11";
+import { renderBottomNav, renderQuickSheet } from "./components/layout.js?v=12";
+import { renderCalendarPage } from "./pages/calendar.js?v=12";
+import { renderMenuPage } from "./pages/menu.js?v=12";
+import { renderMorePage } from "./pages/more.js?v=12";
+import { renderPeoplePage } from "./pages/people.js?v=12";
+import { renderShoppingPage } from "./pages/shopping.js?v=12";
+import { renderStatsPage } from "./pages/stats.js?v=12";
+import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=12";
+import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=12";
+import { createTask, fetchTasks, updateTaskCompletion } from "./lib/api.js?v=12";
+import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=12";
 
 const app = document.getElementById("app");
 
@@ -46,6 +48,7 @@ const dailyPhotoInput = document.getElementById("dailyPhotoInput");
 const openCameraButton = document.querySelector("[data-open-camera]");
 const photoCloseButtons = Array.from(document.querySelectorAll("[data-photo-close]"));
 let lastSheetTrigger = document.getElementById("openQuickAdd");
+let taskState = [];
 const secondaryPages = new Set(["menu", "shopping", "stats", "people"]);
 
 const calendarViewLabels = {
@@ -179,6 +182,92 @@ function showShoppingTab(tabName) {
   });
 }
 
+function renderDynamicTaskViews() {
+  const todayTasksSection = document.getElementById("todayTasksSection");
+
+  if (todayTasksSection) {
+    todayTasksSection.innerHTML = renderTodayTasksContent(taskState);
+  }
+
+  renderTaskViews(taskState);
+  refreshIcons();
+}
+
+async function loadTasks() {
+  const apiTasks = await fetchTasks();
+  taskState = toViewTasks(apiTasks);
+  renderDynamicTaskViews();
+}
+
+function getTaskAssigneePayload(assignee) {
+  if (assignee === "Александр") {
+    return { assigneeType: "USER", assigneeUserId: "demo-alex" };
+  }
+
+  if (assignee === "Настя") {
+    return { assigneeType: "USER", assigneeUserId: "demo-nastya" };
+  }
+
+  if (assignee === "Оба") {
+    return { assigneeType: "SHARED" };
+  }
+
+  return { assigneeType: "UNASSIGNED" };
+}
+
+async function handleTaskSubmit(form) {
+  const status = form.querySelector(".form-status");
+  const submitButton = form.querySelector('[type="submit"]');
+  const formData = new FormData(form);
+  const title = String(formData.get("title") ?? "").trim();
+  const priority = String(formData.get("priority") ?? "").trim();
+  const deadline = String(formData.get("deadline") ?? "").trim();
+  const assignee = String(formData.get("assignee") ?? "").trim();
+
+  if (!title) return;
+
+  if (status) {
+    status.textContent = "Сохраняю...";
+  }
+
+  if (submitButton) {
+    submitButton.disabled = true;
+  }
+
+  try {
+    await createTask({
+      title,
+      details: priority || null,
+      category: "OTHER",
+      deadline: deadline || null,
+      ...getTaskAssigneePayload(assignee),
+    });
+
+    await loadTasks();
+    form.reset();
+
+    const deadlineField = form.querySelector('input[name="deadline"]');
+    if (deadlineField) {
+      deadlineField.value = DEFAULT_TASK_DATE;
+    }
+
+    if (status) {
+      status.textContent = "Готово. Задача сохранена.";
+    }
+
+    window.setTimeout(() => setSheetOpen(false), 450);
+  } catch (error) {
+    console.error(error);
+    if (status) {
+      status.textContent = "Не получилось сохранить. Проверь сервер.";
+    }
+  } finally {
+    if (submitButton) {
+      submitButton.disabled = false;
+    }
+  }
+}
+
 carouselTrack?.addEventListener("scroll", () => {
   window.requestAnimationFrame(updateDots);
 });
@@ -239,14 +328,40 @@ quickActionButtons.forEach((button) => {
 });
 
 quickForms.forEach((form) => {
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
+
+    if (form.dataset.sheetView === "task") {
+      await handleTaskSubmit(form);
+      return;
+    }
+
     const status = form.querySelector(".form-status");
 
     if (status) {
       status.textContent = "Готово. В прототипе это пока не сохраняется в данные.";
     }
   });
+});
+
+document.addEventListener("change", async (event) => {
+  const checkbox = event.target.closest?.("[data-task-complete]");
+  if (!checkbox) return;
+
+  const taskId = checkbox.dataset.taskId;
+  if (!taskId) return;
+
+  checkbox.disabled = true;
+
+  try {
+    await updateTaskCompletion(taskId, checkbox.checked);
+    await loadTasks();
+  } catch (error) {
+    console.error(error);
+    checkbox.checked = !checkbox.checked;
+    checkbox.disabled = false;
+    window.alert("Не получилось обновить задачу. Проверь подключение к серверу.");
+  }
 });
 
 document.addEventListener("keydown", (event) => {
@@ -282,4 +397,7 @@ window.addEventListener("load", () => {
   updateDots();
   showCalendarView("week");
   showShoppingTab("today");
+  loadTasks().catch((error) => {
+    console.warn("Tasks API is unavailable, mock tasks stay visible.", error);
+  });
 });

@@ -1,5 +1,6 @@
-import { carouselCards, dailyPhoto, meals, shopping, tasks, today, todayEvents } from "../data/mock-data.js?v=11";
-import { agendaCard, escapeHtml, icon, pageShell } from "../components/html.js?v=11";
+import { carouselCards, dailyPhoto, meals, shopping, tasks as mockTasks, today, todayEvents } from "../data/mock-data.js?v=12";
+import { agendaCard, escapeHtml, icon, pageShell } from "../components/html.js?v=12";
+import { toViewTasks } from "../lib/task-view.js?v=12";
 
 function todaySectionHeader({ id, title, subtitle, action, actionLabel, targetPage }) {
   const actionControl = targetPage
@@ -95,26 +96,46 @@ function renderDailyPhotoOverlay() {
   `;
 }
 
-function renderTodayTasks() {
-  const activeCount = tasks.filter((task) => !task.completed).length;
+const initialTasks = toViewTasks(mockTasks);
+
+export function renderTodayTasksContent(tasks) {
+  const activeTasks = tasks.filter((task) => !task.completed && task.date === "Сегодня");
+  const activeCount = activeTasks.length;
 
   return `
-    <section class="feed-section" aria-labelledby="tasksTitle">
-      ${todaySectionHeader({ id: "tasksTitle", title: "Задачи", subtitle: `${activeCount} активные`, action: "Все", actionLabel: "Открыть задачи", targetPage: "tasks" })}
-      ${tasks
-        .filter((task) => !task.completed)
-        .map(
-          (task) => `
-            <label class="task-row">
-              <input type="checkbox" />
-              <span>
-                <strong>${escapeHtml(task.title)}</strong>
-                <small>${escapeHtml(task.assignee)} · ${escapeHtml(task.details)}</small>
-              </span>
-            </label>
-          `,
-        )
-        .join("")}
+    ${todaySectionHeader({ id: "tasksTitle", title: "Задачи", subtitle: `${activeCount} активные`, action: "Все", actionLabel: "Открыть задачи", targetPage: "tasks" })}
+    ${
+      activeTasks.length
+        ? activeTasks
+            .map(
+              (task) => `
+                <label class="task-row">
+                  <input type="checkbox"${task.id ? ` data-task-complete data-task-id="${escapeHtml(task.id)}"` : ""} />
+                  <span>
+                    <strong>${escapeHtml(task.title)}</strong>
+                    <small>${escapeHtml(task.assignee)} · ${escapeHtml(task.details)}</small>
+                  </span>
+                </label>
+              `,
+            )
+            .join("")
+        : `
+          <article class="task-row">
+            <span></span>
+            <span>
+              <strong>На сегодня всё чисто</strong>
+              <small>Новая задача появится здесь после сохранения.</small>
+            </span>
+          </article>
+        `
+    }
+  `;
+}
+
+function renderTodayTasks(tasks = initialTasks) {
+  return `
+    <section class="feed-section" id="todayTasksSection" aria-labelledby="tasksTitle">
+      ${renderTodayTasksContent(tasks)}
     </section>
   `;
 }

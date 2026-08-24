@@ -1,4 +1,4 @@
-import { icon } from "./html.js?v=11";
+import { icon } from "./html.js?v=12";
 
 export function renderBottomNav() {
   const items = [
