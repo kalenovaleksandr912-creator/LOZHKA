@@ -1,4 +1,4 @@
-import { icon } from "./html.js?v=14";
+import { icon } from "./html.js?v=15";
 
 export function renderBottomNav() {
   const items = [
@@ -164,7 +164,7 @@ export function renderProfileCard() {
           <div>
             <p>LOZHKA</p>
             <h3>Александр</h3>
-            <span>В паре с Сашей</span>
+            <span>Партнёр: Саша</span>
           </div>
         </div>
 
@@ -187,7 +187,7 @@ export function renderProfileCard() {
       </section>
 
       <div class="profile-actions">
-        <button type="button">
+        <button type="button" data-target-page="personal-data">
           <span class="row-icon blue">${icon("user")}</span>
           <span>
             <strong>Личные данные</strong>
@@ -195,7 +195,7 @@ export function renderProfileCard() {
           </span>
           ${icon("chevron-right")}
         </button>
-        <button type="button">
+        <button type="button" data-target-page="our-dates">
           <span class="row-icon rose">${icon("heart")}</span>
           <span>
             <strong>Наши даты</strong>
@@ -203,7 +203,7 @@ export function renderProfileCard() {
           </span>
           ${icon("chevron-right")}
         </button>
-        <button type="button">
+        <button type="button" data-target-page="notifications">
           <span class="row-icon green">${icon("bell")}</span>
           <span>
             <strong>Уведомления</strong>

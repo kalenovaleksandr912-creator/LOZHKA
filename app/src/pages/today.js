@@ -1,6 +1,6 @@
-import { carouselCards, dailyPhoto, meals, shopping, tasks as mockTasks, today, todayEvents } from "../data/mock-data.js?v=14";
-import { agendaCard, escapeHtml, icon, pageShell } from "../components/html.js?v=14";
-import { toViewTasks } from "../lib/task-view.js?v=14";
+import { carouselCards, dailyPhoto, meals, shopping, tasks as mockTasks, today, todayEvents } from "../data/mock-data.js?v=15";
+import { agendaCard, escapeHtml, icon, pageShell } from "../components/html.js?v=15";
+import { toViewTasks } from "../lib/task-view.js?v=15";
 
 function todaySectionHeader({ id, title, subtitle, action, actionLabel, targetPage }) {
   const actionControl = targetPage

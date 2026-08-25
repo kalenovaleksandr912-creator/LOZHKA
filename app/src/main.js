@@ -1,14 +1,17 @@
-import { renderBottomNav, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=14";
-import { renderCalendarPage } from "./pages/calendar.js?v=14";
-import { renderMenuPage } from "./pages/menu.js?v=14";
-import { renderMorePage } from "./pages/more.js?v=14";
-import { renderPeoplePage } from "./pages/people.js?v=14";
-import { renderShoppingPage } from "./pages/shopping.js?v=14";
-import { renderStatsPage } from "./pages/stats.js?v=14";
-import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=14";
-import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=14";
-import { createTask, fetchTasks, updateTaskCompletion } from "./lib/api.js?v=14";
-import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=14";
+import { renderBottomNav, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=15";
+import { renderCalendarPage } from "./pages/calendar.js?v=15";
+import { renderMenuPage } from "./pages/menu.js?v=15";
+import { renderMorePage } from "./pages/more.js?v=15";
+import { renderNotificationsPage } from "./pages/notifications.js?v=15";
+import { renderOurDatesPage } from "./pages/our-dates.js?v=15";
+import { renderPeoplePage } from "./pages/people.js?v=15";
+import { renderPersonalDataPage } from "./pages/personal-data.js?v=15";
+import { renderShoppingPage } from "./pages/shopping.js?v=15";
+import { renderStatsPage } from "./pages/stats.js?v=15";
+import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=15";
+import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=15";
+import { createTask, fetchTasks, updateTaskCompletion } from "./lib/api.js?v=15";
+import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=15";
 
 const app = document.getElementById("app");
 
@@ -21,6 +24,9 @@ app.innerHTML = `
   ${renderShoppingPage()}
   ${renderStatsPage()}
   ${renderPeoplePage()}
+  ${renderPersonalDataPage()}
+  ${renderOurDatesPage()}
+  ${renderNotificationsPage()}
   ${renderBottomNav()}
   ${renderQuickSheet()}
   ${renderProfileCard()}
@@ -56,8 +62,10 @@ const themeButtons = Array.from(document.querySelectorAll("[data-theme-choice]")
 let lastSheetTrigger = document.getElementById("openQuickAdd");
 let lastProfileTrigger = null;
 let taskState = [];
-const secondaryPages = new Set(["menu", "shopping", "stats", "people"]);
+const secondaryPages = new Set(["menu", "shopping", "stats", "people", "personal-data", "our-dates", "notifications"]);
 const themeStorageKey = "lozhka-theme";
+const personalStorageKey = "lozhka-personal-data";
+const notificationsStorageKey = "lozhka-notifications";
 const availableThemes = new Set(["dark", "rose"]);
 
 const calendarViewLabels = {
@@ -108,6 +116,109 @@ function applyTheme(themeName) {
   }
 }
 
+function readJson(key, fallback) {
+  try {
+    const value = window.localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeJson(key, value) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Local preferences remain interactive even if storage is unavailable.
+  }
+}
+
+function applyPersonalData() {
+  const data = readJson(personalStorageKey, {});
+  const name = data.name || "Александр";
+  const avatar = (data.avatar || "Ал").trim().slice(0, 2) || "Ал";
+  const partner = data.partner || "Саша";
+
+  document.querySelectorAll("[data-personal-field]").forEach((field) => {
+    const value = data[field.dataset.personalField];
+    if (typeof value === "string") {
+      field.value = value;
+    }
+  });
+
+  document.querySelectorAll(".avatar-button, .profile-avatar").forEach((item) => {
+    item.textContent = avatar;
+  });
+
+  document.querySelectorAll(".profile-main h3, .settings-profile-card h2").forEach((item) => {
+    item.textContent = name;
+  });
+
+  document.querySelectorAll(".profile-main > div > span").forEach((item) => {
+    item.textContent = `Партнёр: ${partner}`;
+  });
+}
+
+function savePersonalData() {
+  const data = {};
+
+  document.querySelectorAll("[data-personal-field]").forEach((field) => {
+    data[field.dataset.personalField] = field.value.trim();
+  });
+
+  writeJson(personalStorageKey, data);
+  applyPersonalData();
+
+  const status = document.getElementById("personalDataStatus");
+  if (status) {
+    status.textContent = "Сохранено на этом устройстве.";
+  }
+}
+
+function getNotificationSettings() {
+  return readJson(notificationsStorageKey, {});
+}
+
+function applyNotificationSettings() {
+  const settings = getNotificationSettings();
+
+  document.querySelectorAll("[data-notification-key]").forEach((field) => {
+    if (typeof settings[field.dataset.notificationKey] === "boolean") {
+      field.checked = settings[field.dataset.notificationKey];
+    }
+  });
+
+  const quietHours = document.querySelector("[data-quiet-hours]");
+  if (quietHours && typeof settings.quietHours === "boolean") {
+    quietHours.checked = settings.quietHours;
+  }
+
+  const summaryTime = document.querySelector("[data-summary-time]");
+  if (summaryTime && typeof settings.summaryTime === "string") {
+    summaryTime.value = settings.summaryTime;
+  }
+}
+
+function saveNotificationSettings() {
+  const settings = getNotificationSettings();
+
+  document.querySelectorAll("[data-notification-key]").forEach((field) => {
+    settings[field.dataset.notificationKey] = field.checked;
+  });
+
+  const quietHours = document.querySelector("[data-quiet-hours]");
+  if (quietHours) {
+    settings.quietHours = quietHours.checked;
+  }
+
+  const summaryTime = document.querySelector("[data-summary-time]");
+  if (summaryTime) {
+    settings.summaryTime = summaryTime.value;
+  }
+
+  writeJson(notificationsStorageKey, settings);
+}
+
 function updateDots() {
   if (!carouselTrack || dots.length === 0) return;
   const cardWidth = carouselTrack.scrollWidth / dots.length;
@@ -153,7 +264,7 @@ function setProfileOpen(isOpen) {
 
   if (isOpen) {
     profileSheet.querySelector("[data-profile-close]")?.focus();
-  } else if (lastProfileTrigger) {
+  } else if (lastProfileTrigger && !lastProfileTrigger.closest("[hidden]")) {
     lastProfileTrigger.focus();
   }
 }
@@ -353,6 +464,10 @@ document.addEventListener("click", (event) => {
 
   if (targetPageControl) {
     showPage(targetPageControl.dataset.targetPage);
+
+    if (profileSheet?.contains(targetPageControl)) {
+      setProfileOpen(false);
+    }
   }
 
   if (dailyPhotoCard) {
@@ -409,6 +524,10 @@ quickForms.forEach((form) => {
 });
 
 document.addEventListener("change", async (event) => {
+  if (event.target.closest?.("[data-notification-key], [data-quiet-hours], [data-summary-time]")) {
+    saveNotificationSettings();
+  }
+
   const checkbox = event.target.closest?.("[data-task-complete]");
   if (!checkbox) return;
 
@@ -425,6 +544,13 @@ document.addEventListener("change", async (event) => {
     checkbox.checked = !checkbox.checked;
     checkbox.disabled = false;
     window.alert("Не получилось обновить задачу. Проверь подключение к серверу.");
+  }
+});
+
+document.addEventListener("click", (event) => {
+  const savePersonalButton = event.target.closest?.("[data-save-personal-data]");
+  if (savePersonalButton) {
+    savePersonalData();
   }
 });
 
@@ -462,6 +588,8 @@ shoppingTabButtons.forEach((button) => {
 
 window.addEventListener("load", () => {
   applyTheme(getSavedTheme());
+  applyPersonalData();
+  applyNotificationSettings();
   refreshIcons();
   updateDots();
   showCalendarView("week");

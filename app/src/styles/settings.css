@@ -1,0 +1,272 @@
+.app-page[data-page="personal-data"],
+.app-page[data-page="our-dates"],
+.app-page[data-page="notifications"] {
+  gap: 16px;
+}
+
+.settings-profile-card,
+.settings-panel,
+.settings-field,
+.date-card,
+.notification-row {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.settings-profile-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, var(--rose-soft), transparent 60%),
+    var(--surface-2);
+}
+
+.settings-profile-card div {
+  min-width: 0;
+}
+
+.settings-profile-card p,
+.settings-profile-card small,
+.settings-field small,
+.settings-panel small,
+.date-card small,
+.notification-row small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.settings-profile-card p {
+  margin: 0 0 5px;
+}
+
+.settings-profile-card h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 27px;
+  line-height: 1.05;
+}
+
+.settings-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-field,
+.notification-row,
+.date-card,
+.settings-panel {
+  min-width: 0;
+  border-radius: 20px;
+}
+
+.settings-field {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 13px;
+  align-items: center;
+  padding: 13px 14px;
+}
+
+.settings-field > span:nth-child(2),
+.notification-row > span:nth-child(2),
+.date-card > div,
+.settings-panel > div {
+  min-width: 0;
+}
+
+.settings-field input {
+  width: 100%;
+  min-height: 30px;
+  margin-top: 3px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  outline: none;
+}
+
+.settings-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 13px;
+  align-items: center;
+  padding: 14px;
+}
+
+.settings-panel strong,
+.date-card strong,
+.notification-row strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.16;
+}
+
+.settings-panel small,
+.date-card small,
+.notification-row small {
+  margin-top: 5px;
+}
+
+.color-swatch {
+  width: 34px;
+  height: 34px;
+  border-radius: 13px;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.color-swatch.blue {
+  background: var(--blue);
+}
+
+.settings-submit {
+  min-height: 52px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--control-bg);
+  color: var(--control-text);
+  font-size: 15px;
+  font-weight: 820;
+  box-shadow: var(--control-shadow);
+  cursor: pointer;
+}
+
+.settings-status {
+  min-height: 18px;
+  margin: -4px 0 0;
+  color: var(--green-text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.date-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.date-summary article {
+  min-width: 0;
+  min-height: 86px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface-2);
+}
+
+.date-summary strong,
+.date-summary span {
+  display: block;
+}
+
+.date-summary strong {
+  color: var(--text);
+  font-size: 29px;
+  line-height: 1;
+}
+
+.date-summary span {
+  margin-top: 7px;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 760;
+  line-height: 1.16;
+}
+
+.date-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 13px;
+  align-items: center;
+  padding: 14px;
+}
+
+.date-card time {
+  display: block;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+  color: var(--rose-text);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.16;
+}
+
+.notification-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 13px;
+  align-items: center;
+  min-height: 76px;
+  padding: 13px 14px;
+}
+
+.switch-input {
+  appearance: none;
+  position: relative;
+  width: 50px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--soft-fill-strong);
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.switch-input::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  transition: transform 160ms ease;
+}
+
+.switch-input:checked {
+  background: var(--rose);
+}
+
+.switch-input:checked::before {
+  transform: translateX(20px);
+}
+
+.reminder-panel input[type="time"] {
+  width: 96px;
+  min-height: 40px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--soft-fill);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 760;
+}
+
+.quiet-panel {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+@media (max-width: 360px) {
+  .date-summary {
+    grid-template-columns: 1fr;
+  }
+}

@@ -136,8 +136,9 @@ export const moreGroups = [
     label: "Система",
     title: "Настройки",
     items: [
-      { icon: "heart", tone: "rose", title: "Наши даты", details: "Годовщины и личные события" },
-      { icon: "settings", tone: "neutral", title: "Настройки", details: "Профиль, тема, уведомления, корзина" },
+      { icon: "user", tone: "blue", title: "Личные данные", details: "Имя, аватар и роль", targetPage: "personal-data" },
+      { icon: "bell", tone: "green", title: "Уведомления", details: "Задачи, покупки и календарь", targetPage: "notifications" },
+      { icon: "heart", tone: "rose", title: "Наши даты", details: "Годовщины и личные события", targetPage: "our-dates" },
     ],
   },
 ];
