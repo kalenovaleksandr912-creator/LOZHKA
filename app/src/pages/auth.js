@@ -1,4 +1,4 @@
-import { icon, pageShell } from "../components/html.js?v=21";
+import { icon, pageShell } from "../components/html.js?v=22";
 
 const authSteps = [
   { key: "start", label: "Вход" },

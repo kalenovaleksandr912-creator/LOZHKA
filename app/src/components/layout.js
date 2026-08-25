@@ -1,4 +1,5 @@
-import { icon } from "./html.js?v=21";
+import { icon } from "./html.js?v=22";
+import { TODAY_ISO } from "../lib/dates.js?v=22";
 
 export function renderBottomNav() {
   const items = [
@@ -86,7 +87,7 @@ export function renderQuickSheet() {
         </div>
         <label class="field">
           <span>Дедлайн</span>
-          <input name="deadline" type="date" value="2026-08-24" />
+          <input name="deadline" type="date" value="${TODAY_ISO}" />
         </label>
         <button class="form-submit" type="submit">Создать задачу</button>
         <p class="form-status" aria-live="polite"></p>
@@ -100,7 +101,7 @@ export function renderQuickSheet() {
         <div class="field-grid">
           <label class="field">
             <span>Дата</span>
-            <input name="date" type="date" value="2026-08-24" />
+            <input name="date" type="date" value="${TODAY_ISO}" />
           </label>
           <label class="field">
             <span>Время</span>
@@ -141,7 +142,7 @@ export function renderQuickSheet() {
         </div>
         <label class="field">
           <span>Дата</span>
-          <input name="date" type="date" value="2026-08-24" />
+          <input name="date" type="date" value="${TODAY_ISO}" />
         </label>
         <label class="field">
           <span>Примечание</span>

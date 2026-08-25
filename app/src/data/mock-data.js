@@ -1,6 +1,8 @@
+import { TOMORROW, formatDayMonth, formatWeekdayLong, TODAY } from "../lib/dates.js?v=22";
+
 export const today = {
-  weekday: "Понедельник",
-  date: "24 августа",
+  weekday: formatWeekdayLong(TODAY),
+  date: formatDayMonth(TODAY),
   summaryTitle: "Сегодня",
   summarySubtitle: "Короткая сводка дня",
 };
@@ -89,16 +91,6 @@ export const shopping = [
   { title: "Яйца", completed: false },
   { title: "Хлеб", completed: false },
   { title: "Сыр для пасты", completed: false },
-];
-
-export const calendarWeek = [
-  { weekday: "Пн", date: "24", count: "5" },
-  { weekday: "Вт", date: "25", count: "3" },
-  { weekday: "Ср", date: "26", count: "7", active: true },
-  { weekday: "Чт", date: "27", count: "2" },
-  { weekday: "Пт", date: "28", count: "4" },
-  { weekday: "Сб", date: "29", count: "1" },
-  { weekday: "Вс", date: "30", count: "0" },
 ];
 
 export const agenda = [
@@ -287,8 +279,8 @@ export const shoppingLists = [
     title: "Предстоящие",
     subtitle: "5 позиций",
     items: [
-      { title: "Ягоды", details: "25 августа · завтрак", category: "products", priority: "Надо сделать", owner: "Настя", completed: false },
-      { title: "Тунец", details: "25 августа · салат", category: "products", priority: "Надо сделать", owner: "Общее", completed: false },
+      { title: "Ягоды", details: `${formatDayMonth(TOMORROW)} · завтрак`, category: "products", priority: "Надо сделать", owner: "Настя", completed: false },
+      { title: "Тунец", details: `${formatDayMonth(TOMORROW)} · салат`, category: "products", priority: "Надо сделать", owner: "Общее", completed: false },
       { title: "Макароны", details: "Для пасты", category: "products", priority: "Срочно", owner: "Александр", completed: false },
       { title: "Батарейки", details: "На выходные", category: "other", priority: "Когда-нибудь", owner: "Александр", completed: false },
       { title: "Бумажные полотенца", details: "Для кухни", category: "other", priority: "Надо сделать", owner: "Общее", completed: false },

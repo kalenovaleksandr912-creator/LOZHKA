@@ -1,14 +1,35 @@
-import { agenda, calendarWeek, tomorrowAgenda } from "../data/mock-data.js?v=21";
-import { agendaCard, escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=21";
+import { agenda, tomorrowAgenda } from "../data/mock-data.js?v=22";
+import { agendaCard, escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=22";
+import { TODAY, TOMORROW, addDays, buildCalendarWeek, buildMonthCells, formatDayMonth, formatMonthYear, formatWeekdayLong } from "../lib/dates.js?v=22";
+
+function getCalendarCount(date) {
+  const dayOffset = Math.round((date.getTime() - TODAY.getTime()) / 86400000);
+  const knownCounts = {
+    "-1": 3,
+    0: 7,
+    1: 3,
+    2: 2,
+    3: 4,
+    4: 1,
+  };
+
+  if (String(dayOffset) in knownCounts) {
+    return knownCounts[String(dayOffset)];
+  }
+
+  return [0, 1, 2, 0, 1, 3, 0][date.getDate() % 7];
+}
 
 function renderWeek() {
+  const weekDays = buildCalendarWeek(TODAY, getCalendarCount);
+
   return `
     <section class="calendar-view is-active" data-calendar-view="week" aria-labelledby="weekTitle">
       <section class="week-strip" aria-label="Дни недели">
-        ${calendarWeek
+        ${weekDays
           .map(
             (day) => `
-              <button class="${day.active ? "is-active" : ""}" type="button" data-calendar-day="${escapeHtml(day.date)}" data-calendar-day-label="${escapeHtml(day.weekday)} ${escapeHtml(day.date)} августа" data-calendar-day-count="${escapeHtml(day.count)}">
+              <button class="${day.active ? "is-active" : ""}" type="button" data-calendar-day="${escapeHtml(day.iso)}" data-calendar-day-label="${escapeHtml(day.label)}" data-calendar-day-count="${escapeHtml(day.count)}">
                 <span>${escapeHtml(day.weekday)}</span>
                 <strong>${escapeHtml(day.date)}</strong>
                 <small>${escapeHtml(day.count)}</small>
@@ -19,7 +40,7 @@ function renderWeek() {
       </section>
 
       <section class="calendar-day" aria-labelledby="weekTitle">
-        ${sectionTitle({ eyebrow: "Среда", title: "26 августа", action: "День", actionLabel: "Открыть день", calendarView: "day" })}
+        ${sectionTitle({ eyebrow: formatWeekdayLong(TODAY), title: formatDayMonth(TODAY), action: "День", actionLabel: "Открыть день", calendarView: "day" })}
         ${agenda.map(agendaCard).join("")}
       </section>
     </section>
@@ -27,23 +48,17 @@ function renderWeek() {
 }
 
 function renderMonthGrid() {
-  const cells = [
-    ["27", "muted"], ["28", "muted"], ["29", "muted"], ["30", "muted"], ["31", "muted"], ["1"], ["2"],
-    ["3"], ["4"], ["5"], ["6"], ["7"], ["8"], ["9"],
-    ["10"], ["11"], ["12"], ["13"], ["14"], ["15"], ["16"],
-    ["17"], ["18"], ["19"], ["20"], ["21"], ["22"], ["23"],
-    ["24", "today", 3], ["25", "", 2], ["26", "active", 3], ["27", "", 1], ["28", "", 2], ["29"], ["30"],
-    ["31"], ["1", "muted"], ["2", "muted"], ["3", "muted"], ["4", "muted"], ["5", "muted"], ["6", "muted"],
-  ];
+  const cells = buildMonthCells(TODAY, getCalendarCount);
 
   return cells
-    .map(([date, state = "", dots = 0]) => {
-      const classes = [state === "muted" ? "is-muted" : "", state === "today" ? "is-today has-items" : "", state === "active" ? "is-active has-items" : "", dots ? "has-items" : ""]
+    .map((cell) => {
+      const dots = Math.min(cell.count, 3);
+      const classes = [cell.muted ? "is-muted" : "", cell.today ? "is-today" : "", cell.active ? "is-active" : "", cell.count ? "has-items" : ""]
         .filter(Boolean)
         .join(" ");
       return `
-        <button class="${classes}" type="button" data-calendar-day="${escapeHtml(date)}" data-calendar-day-label="${escapeHtml(date)} августа" data-calendar-day-count="${escapeHtml(dots)}">
-          <strong>${escapeHtml(date)}</strong>
+        <button class="${classes}" type="button" data-calendar-day="${escapeHtml(cell.iso)}" data-calendar-day-label="${escapeHtml(cell.label)}" data-calendar-day-count="${escapeHtml(cell.count)}">
+          <strong>${escapeHtml(cell.date)}</strong>
           ${dots ? `<span>${Array.from({ length: dots }, () => "<i></i>").join("")}</span>` : ""}
         </button>
       `;
@@ -52,19 +67,21 @@ function renderMonthGrid() {
 }
 
 function renderMonth() {
+  const todayCount = getCalendarCount(TODAY);
+
   return `
     <section class="calendar-view" data-calendar-view="month" aria-labelledby="monthTitle" hidden>
-      ${sectionTitle({ eyebrow: "Месяц", title: "Август 2026", action: "Дальше", actionLabel: "Следующий месяц", attrs: { "data-calendar-next-month": true } })}
+      ${sectionTitle({ eyebrow: "Месяц", title: formatMonthYear(TODAY), action: "Дальше", actionLabel: "Следующий месяц", attrs: { "data-calendar-next-month": true } })}
       <div class="month-weekdays" aria-hidden="true">
         <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
       </div>
-      <div class="month-grid" aria-label="Август 2026">
+      <div class="month-grid" aria-label="${escapeHtml(formatMonthYear(TODAY))}">
         ${renderMonthGrid()}
       </div>
       <div class="month-preview">
         <div>
-          <strong>26 августа</strong>
-          <span>7 объектов: врач, задача, ужин, покупки и ближайшая дата.</span>
+          <strong>${escapeHtml(formatDayMonth(TODAY))}</strong>
+          <span>${todayCount} объектов: врач, задача, ужин, покупки и ближайшая дата.</span>
         </div>
       </div>
     </section>
@@ -76,14 +93,14 @@ function renderDay() {
     <section class="calendar-view" data-calendar-view="day" data-calendar-date="tomorrow" aria-labelledby="dayTitle" hidden>
       <div class="day-focus">
         <div>
-          <p>Вторник</p>
-          <h2 id="dayTitle">25 августа</h2>
+          <p>${escapeHtml(formatWeekdayLong(TOMORROW))}</p>
+          <h2 id="dayTitle">${escapeHtml(formatDayMonth(TOMORROW))}</h2>
           <span>Завтрашние планы</span>
         </div>
         ${icon("calendar-days")}
       </div>
 
-      <section class="calendar-day day-timeline" aria-label="День 25 августа">
+      <section class="calendar-day day-timeline" aria-label="День ${escapeHtml(formatDayMonth(TOMORROW))}">
         ${tomorrowAgenda.map(agendaCard).join("")}
       </section>
     </section>
@@ -91,23 +108,24 @@ function renderDay() {
 }
 
 function renderList() {
+  const laterDate = addDays(TODAY, 3);
   const groups = [
     {
-      title: "24 августа, сегодня",
+      title: `${formatDayMonth(TODAY)}, сегодня`,
       items: [
         { kind: "task", time: "18:00", title: "Забрать заказ", details: "Задача · Александр" },
         { kind: "menu", time: "Ужин", title: "Курица, картофель, салат", details: "Меню" },
       ],
     },
     {
-      title: "25 августа, завтра",
+      title: `${formatDayMonth(TOMORROW)}, завтра`,
       items: [
         { kind: "event", time: "09:00", title: "Врач", details: "Событие" },
         { kind: "shopping", time: "Список", title: "Покупки к пасте", details: "4 позиции" },
       ],
     },
     {
-      title: "28 августа",
+      title: formatDayMonth(laterDate),
       items: [{ kind: "date", time: "Дата", title: "День рождения Анны", details: "Из раздела Люди" }],
     },
   ];

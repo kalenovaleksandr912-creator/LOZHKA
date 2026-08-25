@@ -1,4 +1,6 @@
-export const DEFAULT_TASK_DATE = "2026-08-24";
+import { TODAY_ISO, TOMORROW_ISO } from "./dates.js?v=22";
+
+export const DEFAULT_TASK_DATE = TODAY_ISO;
 
 const userIdToOwner = {
   "demo-alex": "me",
@@ -25,6 +27,7 @@ function formatDateLabel(value, completed) {
 
   const dateOnly = String(value).slice(0, 10);
   if (dateOnly === DEFAULT_TASK_DATE) return "Сегодня";
+  if (dateOnly === TOMORROW_ISO) return "Завтра";
 
   const [, month, day] = dateOnly.split("-");
   return `${day}.${month}`;

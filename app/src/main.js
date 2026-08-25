@@ -1,18 +1,19 @@
-import { renderBottomNav, renderDetailSheet, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=21";
-import { agendaCard, icon } from "./components/html.js?v=21";
-import { renderAuthPage } from "./pages/auth.js?v=21";
-import { renderCalendarPage } from "./pages/calendar.js?v=21";
-import { renderMenuPage } from "./pages/menu.js?v=21";
-import { renderMorePage } from "./pages/more.js?v=21";
-import { renderNotificationsPage } from "./pages/notifications.js?v=21";
-import { renderOurDatesPage } from "./pages/our-dates.js?v=21";
-import { renderPeoplePage } from "./pages/people.js?v=21";
-import { renderPersonalDataPage } from "./pages/personal-data.js?v=21";
-import { renderShoppingPage, renderShoppingViews } from "./pages/shopping.js?v=21";
-import { renderStatsPage } from "./pages/stats.js?v=21";
-import { getTaskBoardTitle, getVisibleTasks, renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=21";
-import { renderTodayEventsContent, renderTodayPage, renderTodayShoppingContent, renderTodayTasksContent } from "./pages/today.js?v=21";
-import { shopping as defaultTodayShopping, shoppingLists, tasks as defaultTaskData, todayEvents as defaultTodayEvents } from "./data/mock-data.js?v=21";
+import { renderBottomNav, renderDetailSheet, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=22";
+import { agendaCard, icon } from "./components/html.js?v=22";
+import { renderAuthPage } from "./pages/auth.js?v=22";
+import { renderCalendarPage } from "./pages/calendar.js?v=22";
+import { renderMenuPage } from "./pages/menu.js?v=22";
+import { renderMorePage } from "./pages/more.js?v=22";
+import { renderNotificationsPage } from "./pages/notifications.js?v=22";
+import { renderOurDatesPage } from "./pages/our-dates.js?v=22";
+import { renderPeoplePage } from "./pages/people.js?v=22";
+import { renderPersonalDataPage } from "./pages/personal-data.js?v=22";
+import { renderShoppingPage, renderShoppingViews } from "./pages/shopping.js?v=22";
+import { renderStatsPage } from "./pages/stats.js?v=22";
+import { getTaskBoardTitle, getVisibleTasks, renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=22";
+import { renderTodayEventsContent, renderTodayPage, renderTodayShoppingContent, renderTodayTasksContent } from "./pages/today.js?v=22";
+import { shopping as defaultTodayShopping, shoppingLists, tasks as defaultTaskData, todayEvents as defaultTodayEvents } from "./data/mock-data.js?v=22";
+import { TODAY, addMonths, formatMonthYear } from "./lib/dates.js?v=22";
 import {
   clearSession,
   completeAuth as completeAuthRequest,
@@ -25,8 +26,8 @@ import {
   updateCurrentSession,
   updateTaskCompletion,
   verifyAuthCode,
-} from "./lib/api.js?v=21";
-import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=21";
+} from "./lib/api.js?v=22";
+import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=22";
 
 const app = document.getElementById("app");
 
@@ -1690,7 +1691,7 @@ document.addEventListener("click", (event) => {
     showDetail(
       {
         kind: "date",
-        title: "Сентябрь 2026",
+        title: formatMonthYear(addMonths(TODAY, 1)),
         subtitle: "Следующий месяц",
         body: "Навигация по месяцам будет подключена к календарным данным. В прототипе это место показывает будущий сценарий.",
         icon: "calendar-days",
