@@ -67,26 +67,26 @@
 }
 
 .event-kind time {
-  background: rgba(88, 174, 222, 0.18);
-  color: #97d9ff;
+  background: var(--blue-soft);
+  color: var(--blue-text);
 }
 
 .task-kind time {
-  background: rgba(168, 165, 255, 0.17);
-  color: #c7c5ff;
+  background: var(--lavender-soft);
+  color: var(--lavender-text);
 }
 
 .menu-kind time {
-  background: rgba(255, 159, 104, 0.18);
-  color: #ffc09b;
+  background: var(--peach-soft);
+  color: var(--peach-text);
 }
 
 .shopping-kind time {
-  background: rgba(72, 197, 138, 0.16);
-  color: #9ff0c8;
+  background: var(--green-soft);
+  color: var(--green-text);
 }
 
 .date-kind time {
-  background: rgba(255, 91, 143, 0.16);
-  color: #ffacc9;
+  background: var(--rose-soft);
+  color: var(--rose-text);
 }

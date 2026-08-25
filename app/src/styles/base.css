@@ -14,6 +14,90 @@
   --lavender: #a8a5ff;
   --rose: #ff5b8f;
   --shadow: 0 20px 56px rgba(0, 0, 0, 0.36);
+  --body-glow: rgba(88, 174, 222, 0.12);
+  --app-shadow: 0 24px 90px rgba(0, 0, 0, 0.46);
+  --overlay-bg: rgba(0, 0, 0, 0.54);
+  --sheet-bg: #1d1d20;
+  --sheet-shadow: 0 -22px 70px rgba(0, 0, 0, 0.46);
+  --handle-bg: rgba(255, 255, 255, 0.16);
+  --nav-bg: rgba(36, 36, 39, 0.92);
+  --nav-border: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: rgba(88, 174, 222, 0.14);
+  --nav-active-text: #7fc8f4;
+  --control-bg: var(--text);
+  --control-text: #151515;
+  --control-shadow: 0 16px 36px rgba(247, 244, 239, 0.12);
+  --soft-fill: rgba(255, 255, 255, 0.06);
+  --soft-fill-strong: rgba(255, 255, 255, 0.12);
+  --blue-soft: rgba(88, 174, 222, 0.16);
+  --blue-text: #97d9ff;
+  --green-soft: rgba(72, 197, 138, 0.16);
+  --green-text: #9ff0c8;
+  --peach-soft: rgba(255, 159, 104, 0.16);
+  --peach-text: #ffc09b;
+  --lavender-soft: rgba(168, 165, 255, 0.16);
+  --lavender-text: #c7c5ff;
+  --rose-soft: rgba(255, 91, 143, 0.15);
+  --rose-text: #ffacc9;
+  --spotlight-peach: #e78b5a;
+  --spotlight-green: #32a975;
+  --spotlight-lavender: #7774df;
+  --on-accent: #ffffff;
+  --on-accent-muted: rgba(255, 255, 255, 0.78);
+  --accent-glass: rgba(255, 255, 255, 0.18);
+  --dot-bg: rgba(255, 255, 255, 0.3);
+  --dot-active-bg: rgba(255, 255, 255, 0.78);
+}
+
+:root[data-theme="rose"] {
+  color-scheme: light;
+  --page: #f3b8c8;
+  --surface: #fff7fa;
+  --surface-2: #ffffff;
+  --surface-3: #ffeaf1;
+  --text: #3a2530;
+  --muted: #9f7282;
+  --muted-2: #c49aa8;
+  --line: rgba(210, 87, 123, 0.16);
+  --blue: #5ea7c8;
+  --green: #66bd97;
+  --peach: #ff8f92;
+  --lavender: #9a8ce7;
+  --rose: #e6537b;
+  --shadow: 0 18px 42px rgba(185, 72, 104, 0.18);
+  --body-glow: rgba(255, 255, 255, 0.56);
+  --app-shadow: 0 26px 70px rgba(182, 74, 105, 0.24);
+  --overlay-bg: rgba(89, 39, 55, 0.24);
+  --sheet-bg: #fff8fb;
+  --sheet-shadow: 0 -22px 62px rgba(181, 73, 104, 0.18);
+  --handle-bg: rgba(210, 87, 123, 0.2);
+  --nav-bg: rgba(255, 250, 252, 0.9);
+  --nav-border: rgba(210, 87, 123, 0.14);
+  --nav-active-bg: rgba(230, 83, 123, 0.13);
+  --nav-active-text: #d84a72;
+  --control-bg: #e6537b;
+  --control-text: #fff9fb;
+  --control-shadow: 0 16px 30px rgba(230, 83, 123, 0.24);
+  --soft-fill: rgba(230, 83, 123, 0.07);
+  --soft-fill-strong: rgba(230, 83, 123, 0.12);
+  --blue-soft: rgba(94, 167, 200, 0.14);
+  --blue-text: #357f9f;
+  --green-soft: rgba(102, 189, 151, 0.14);
+  --green-text: #3e946f;
+  --peach-soft: rgba(255, 143, 146, 0.15);
+  --peach-text: #d65e63;
+  --lavender-soft: rgba(154, 140, 231, 0.13);
+  --lavender-text: #7467c9;
+  --rose-soft: rgba(230, 83, 123, 0.13);
+  --rose-text: #d84a72;
+  --spotlight-peach: #f06f8c;
+  --spotlight-green: #68bf98;
+  --spotlight-lavender: #9a8ce7;
+  --on-accent: #fffaff;
+  --on-accent-muted: rgba(255, 250, 252, 0.82);
+  --accent-glass: rgba(255, 255, 255, 0.26);
+  --dot-bg: rgba(216, 74, 114, 0.22);
+  --dot-active-bg: #d84a72;
 }
 
 * {
@@ -29,13 +113,20 @@ body {
   min-height: 100%;
   margin: 0;
   background:
-    radial-gradient(circle at 50% -10%, rgba(88, 174, 222, 0.12), transparent 34rem),
+    radial-gradient(circle at 50% -10%, var(--body-glow), transparent 34rem),
     var(--page);
   color: var(--text);
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   letter-spacing: 0;
+}
+
+:root[data-theme="rose"] body {
+  background:
+    radial-gradient(circle at 16% 6%, rgba(255, 255, 255, 0.64), transparent 19rem),
+    radial-gradient(circle at 86% 0%, rgba(255, 230, 237, 0.86), transparent 22rem),
+    linear-gradient(145deg, #f6cfda 0%, #f0a4ba 100%);
 }
 
 button,
@@ -62,6 +153,12 @@ a {
   overflow-x: hidden;
 }
 
+:root[data-theme="rose"] .app-shell {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 244, 248, 0.98)),
+    var(--surface);
+}
+
 @media (min-width: 520px) {
   body {
     padding: 18px 0;
@@ -70,7 +167,7 @@ a {
   .app-shell {
     min-height: calc(100svh - 36px);
     border-radius: 34px;
-    box-shadow: 0 24px 90px rgba(0, 0, 0, 0.46);
+    box-shadow: var(--app-shadow);
   }
 }
 

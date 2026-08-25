@@ -1,14 +1,14 @@
-import { renderBottomNav, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=13";
-import { renderCalendarPage } from "./pages/calendar.js?v=13";
-import { renderMenuPage } from "./pages/menu.js?v=13";
-import { renderMorePage } from "./pages/more.js?v=13";
-import { renderPeoplePage } from "./pages/people.js?v=13";
-import { renderShoppingPage } from "./pages/shopping.js?v=13";
-import { renderStatsPage } from "./pages/stats.js?v=13";
-import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=13";
-import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=13";
-import { createTask, fetchTasks, updateTaskCompletion } from "./lib/api.js?v=13";
-import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=13";
+import { renderBottomNav, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=14";
+import { renderCalendarPage } from "./pages/calendar.js?v=14";
+import { renderMenuPage } from "./pages/menu.js?v=14";
+import { renderMorePage } from "./pages/more.js?v=14";
+import { renderPeoplePage } from "./pages/people.js?v=14";
+import { renderShoppingPage } from "./pages/shopping.js?v=14";
+import { renderStatsPage } from "./pages/stats.js?v=14";
+import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=14";
+import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=14";
+import { createTask, fetchTasks, updateTaskCompletion } from "./lib/api.js?v=14";
+import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=14";
 
 const app = document.getElementById("app");
 
@@ -52,10 +52,13 @@ const profileSheet = document.getElementById("profileSheet");
 const profileBackdrop = document.getElementById("profileBackdrop");
 const profileOpenButtons = Array.from(document.querySelectorAll("[data-profile-open]"));
 const profileCloseButtons = Array.from(document.querySelectorAll("[data-profile-close]"));
+const themeButtons = Array.from(document.querySelectorAll("[data-theme-choice]"));
 let lastSheetTrigger = document.getElementById("openQuickAdd");
 let lastProfileTrigger = null;
 let taskState = [];
 const secondaryPages = new Set(["menu", "shopping", "stats", "people"]);
+const themeStorageKey = "lozhka-theme";
+const availableThemes = new Set(["dark", "rose"]);
 
 const calendarViewLabels = {
   month: "Месяц",
@@ -75,6 +78,33 @@ const quickSheetLabels = {
 function refreshIcons() {
   if (window.lucide) {
     window.lucide.createIcons();
+  }
+}
+
+function getSavedTheme() {
+  try {
+    const savedTheme = window.localStorage.getItem(themeStorageKey);
+    return availableThemes.has(savedTheme) ? savedTheme : "dark";
+  } catch {
+    return "dark";
+  }
+}
+
+function applyTheme(themeName) {
+  const theme = availableThemes.has(themeName) ? themeName : "dark";
+
+  document.documentElement.dataset.theme = theme;
+
+  themeButtons.forEach((button) => {
+    const isActive = button.dataset.themeChoice === theme;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+
+  try {
+    window.localStorage.setItem(themeStorageKey, theme);
+  } catch {
+    // Theme switching still works for the current session if storage is blocked.
   }
 }
 
@@ -308,6 +338,11 @@ profileOpenButtons.forEach((button) => {
 profileCloseButtons.forEach((button) => {
   button.addEventListener("click", () => setProfileOpen(false));
 });
+themeButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    applyTheme(button.dataset.themeChoice);
+  });
+});
 closeQuickAdd?.addEventListener("click", () => setSheetOpen(false));
 sheetBackdrop?.addEventListener("click", () => setSheetOpen(false));
 backQuickAdd?.addEventListener("click", () => showQuickSheetView("menu"));
@@ -426,6 +461,7 @@ shoppingTabButtons.forEach((button) => {
 });
 
 window.addEventListener("load", () => {
+  applyTheme(getSavedTheme());
   refreshIcons();
   updateDots();
   showCalendarView("week");

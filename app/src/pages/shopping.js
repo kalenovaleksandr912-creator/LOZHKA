@@ -1,5 +1,5 @@
-import { shoppingLists } from "../data/mock-data.js?v=13";
-import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=13";
+import { shoppingLists } from "../data/mock-data.js?v=14";
+import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=14";
 
 const priorityClass = {
   Срочно: "urgent",

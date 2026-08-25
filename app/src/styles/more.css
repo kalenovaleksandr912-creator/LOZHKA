@@ -70,31 +70,31 @@
 }
 
 .row-icon.warm {
-  background: rgba(255, 159, 104, 0.16);
-  color: #ffc09b;
+  background: var(--peach-soft);
+  color: var(--peach-text);
 }
 
 .row-icon.green {
-  background: rgba(72, 197, 138, 0.16);
-  color: #9ff0c8;
+  background: var(--green-soft);
+  color: var(--green-text);
 }
 
 .row-icon.lavender {
-  background: rgba(168, 165, 255, 0.16);
-  color: #c7c5ff;
+  background: var(--lavender-soft);
+  color: var(--lavender-text);
 }
 
 .row-icon.blue {
-  background: rgba(88, 174, 222, 0.16);
-  color: #97d9ff;
+  background: var(--blue-soft);
+  color: var(--blue-text);
 }
 
 .row-icon.rose {
-  background: rgba(255, 91, 143, 0.15);
-  color: #ffacc9;
+  background: var(--rose-soft);
+  color: var(--rose-text);
 }
 
 .row-icon.neutral {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--soft-fill);
   color: var(--muted);
 }

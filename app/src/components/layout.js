@@ -1,4 +1,4 @@
-import { icon } from "./html.js?v=13";
+import { icon } from "./html.js?v=14";
 
 export function renderBottomNav() {
   const items = [
@@ -174,6 +174,17 @@ export function renderProfileCard() {
           <span><strong>1</strong><small>фото сегодня</small></span>
         </div>
       </article>
+
+      <section class="profile-theme" aria-label="Тема приложения">
+        <div>
+          <strong>Тема</strong>
+          <small>Персональный вид интерфейса</small>
+        </div>
+        <div class="theme-switch" role="group" aria-label="Выбор темы">
+          <button class="is-active" type="button" data-theme-choice="dark" aria-pressed="true">Тёмная</button>
+          <button type="button" data-theme-choice="rose" aria-pressed="false">Розовая</button>
+        </div>
+      </section>
 
       <div class="profile-actions">
         <button type="button">
