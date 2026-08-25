@@ -5,6 +5,7 @@
 }
 
 .settings-profile-card,
+.settings-photo-card,
 .settings-panel,
 .settings-field,
 .date-card,
@@ -60,6 +61,7 @@
 }
 
 .settings-field,
+.settings-photo-card,
 .notification-row,
 .date-card,
 .settings-panel {
@@ -102,6 +104,79 @@
   gap: 13px;
   align-items: center;
   padding: 14px;
+}
+
+.settings-photo-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 13px;
+  align-items: center;
+  padding: 14px;
+}
+
+.settings-photo-card > div {
+  min-width: 0;
+}
+
+.settings-photo-card strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.16;
+}
+
+.settings-photo-card small {
+  display: block;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.settings-upload-button,
+.settings-secondary-button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 15px;
+  font-size: 13px;
+  font-weight: 820;
+  cursor: pointer;
+}
+
+.settings-upload-button {
+  position: relative;
+  display: inline-flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+  background: var(--control-bg);
+  color: var(--control-text);
+  box-shadow: var(--control-shadow);
+}
+
+.settings-upload-button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.settings-upload-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.settings-secondary-button {
+  grid-column: 1 / -1;
+  background: var(--soft-fill);
+  color: var(--muted);
 }
 
 .settings-panel strong,
@@ -267,6 +342,10 @@
 
 @media (max-width: 360px) {
   .date-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-photo-card {
     grid-template-columns: 1fr;
   }
 }

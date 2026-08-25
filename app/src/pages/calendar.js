@@ -1,5 +1,5 @@
-import { agenda, calendarWeek, tomorrowAgenda } from "../data/mock-data.js?v=17";
-import { agendaCard, escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=17";
+import { agenda, calendarWeek, tomorrowAgenda } from "../data/mock-data.js?v=18";
+import { agendaCard, escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=18";
 
 function renderWeek() {
   return `

@@ -226,6 +226,62 @@
   box-shadow: 0 0 0 3px var(--rose-soft);
 }
 
+.auth-photo-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 13px;
+  align-items: center;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--soft-fill);
+}
+
+.auth-photo-card > div {
+  min-width: 0;
+}
+
+.auth-photo-card strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 820;
+  line-height: 1.16;
+}
+
+.auth-photo-upload {
+  position: relative;
+  display: inline-flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+  min-height: 44px;
+  border-radius: 15px;
+  background: var(--control-bg);
+  color: var(--control-text);
+  font-size: 13px;
+  font-weight: 830;
+  box-shadow: var(--control-shadow);
+  cursor: pointer;
+}
+
+.auth-photo-upload svg {
+  width: 17px;
+  height: 17px;
+}
+
+.auth-photo-upload input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .auth-submit,
 .auth-ghost,
 .auth-inline-actions button {

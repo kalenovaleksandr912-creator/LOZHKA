@@ -1,8 +1,7 @@
-import { escapeHtml, icon, pageShell } from "../components/html.js?v=17";
+import { escapeHtml, icon, pageShell } from "../components/html.js?v=18";
 
 const personalFields = [
   { key: "name", label: "Имя", value: "Александр", placeholder: "Как тебя показывать", icon: "user" },
-  { key: "avatar", label: "Аватар", value: "Ал", placeholder: "1-2 буквы", icon: "badge" },
   { key: "partner", label: "Партнёр", value: "Саша", placeholder: "Имя партнёра", icon: "heart" },
   { key: "phone", label: "Телефон", value: "", placeholder: "+7 999 000-00-00", icon: "phone" },
   { key: "email", label: "Почта", value: "", placeholder: "name@example.com", icon: "mail" },
@@ -47,6 +46,20 @@ export function renderPersonalDataPage() {
           <h2>Александр</h2>
           <small>Основной профиль пространства</small>
         </div>
+      </section>
+
+      <section class="settings-photo-card">
+        <span class="profile-avatar" data-avatar-preview>Ал</span>
+        <div>
+          <strong>Фото профиля</strong>
+          <small>Будет видно в карточке профиля и в верхнем углу.</small>
+        </div>
+        <label class="settings-upload-button">
+          ${icon("image-plus")}
+          <span>Загрузить</span>
+          <input type="file" accept="image/*" data-avatar-photo-input />
+        </label>
+        <button class="settings-secondary-button" type="button" data-avatar-photo-remove>Убрать фото</button>
       </section>
 
       <section class="settings-stack" aria-label="Личные поля">

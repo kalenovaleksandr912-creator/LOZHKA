@@ -1,18 +1,18 @@
-import { renderBottomNav, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=17";
-import { renderAuthPage } from "./pages/auth.js?v=17";
-import { renderCalendarPage } from "./pages/calendar.js?v=17";
-import { renderMenuPage } from "./pages/menu.js?v=17";
-import { renderMorePage } from "./pages/more.js?v=17";
-import { renderNotificationsPage } from "./pages/notifications.js?v=17";
-import { renderOurDatesPage } from "./pages/our-dates.js?v=17";
-import { renderPeoplePage } from "./pages/people.js?v=17";
-import { renderPersonalDataPage } from "./pages/personal-data.js?v=17";
-import { renderShoppingPage } from "./pages/shopping.js?v=17";
-import { renderStatsPage } from "./pages/stats.js?v=17";
-import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=17";
-import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=17";
-import { createTask, fetchTasks, updateTaskCompletion } from "./lib/api.js?v=17";
-import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=17";
+import { renderBottomNav, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=18";
+import { renderAuthPage } from "./pages/auth.js?v=18";
+import { renderCalendarPage } from "./pages/calendar.js?v=18";
+import { renderMenuPage } from "./pages/menu.js?v=18";
+import { renderMorePage } from "./pages/more.js?v=18";
+import { renderNotificationsPage } from "./pages/notifications.js?v=18";
+import { renderOurDatesPage } from "./pages/our-dates.js?v=18";
+import { renderPeoplePage } from "./pages/people.js?v=18";
+import { renderPersonalDataPage } from "./pages/personal-data.js?v=18";
+import { renderShoppingPage } from "./pages/shopping.js?v=18";
+import { renderStatsPage } from "./pages/stats.js?v=18";
+import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=18";
+import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=18";
+import { createTask, fetchTasks, updateTaskCompletion } from "./lib/api.js?v=18";
+import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=18";
 
 const app = document.getElementById("app");
 
@@ -134,9 +134,70 @@ function readJson(key, fallback) {
 function writeJson(key, value) {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
+    return true;
   } catch {
     // Local preferences remain interactive even if storage is unavailable.
+    return false;
   }
+}
+
+function getInitials(name) {
+  const parts = String(name || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[1][0]}`.toLocaleUpperCase("ru-RU");
+  }
+
+  return (parts[0]?.slice(0, 2) || "Ал").toLocaleUpperCase("ru-RU");
+}
+
+function setAvatarVisual(element, photoUrl, initials) {
+  const hasPhoto = Boolean(photoUrl);
+
+  element.classList.toggle("has-photo", hasPhoto);
+  element.style.backgroundImage = hasPhoto ? `url("${photoUrl}")` : "";
+  element.textContent = hasPhoto ? "" : initials;
+}
+
+function applyAvatarVisuals(data) {
+  const name = data.name || "Александр";
+  const initials = data.avatar || getInitials(name);
+  const photoUrl = data.avatarPhoto || "";
+
+  document.querySelectorAll(".avatar-button, .profile-avatar").forEach((item) => {
+    setAvatarVisual(item, photoUrl, initials);
+  });
+}
+
+function readImageAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.addEventListener("load", () => {
+      const image = new Image();
+
+      image.addEventListener("load", () => {
+        const maxSize = 720;
+        const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
+      });
+
+      image.addEventListener("error", reject);
+      image.src = reader.result;
+    });
+
+    reader.addEventListener("error", reject);
+    reader.readAsDataURL(file);
+  });
 }
 
 function createInviteCode() {
@@ -231,20 +292,19 @@ function updateAuthUi() {
 
   const personalData = readJson(personalStorageKey, {});
   const profileName = document.querySelector("[data-auth-profile-name]");
-  const profileAvatar = document.querySelector("[data-auth-profile-avatar]");
   const profilePartner = document.querySelector("[data-auth-profile-partner]");
 
   if (profileName && personalData.name) {
     profileName.value = personalData.name;
   }
 
-  if (profileAvatar && personalData.avatar) {
-    profileAvatar.value = personalData.avatar;
-  }
-
   if (profilePartner && personalData.partner) {
     profilePartner.value = personalData.partner;
   }
+
+  document.querySelectorAll("[data-auth-avatar-preview]").forEach((item) => {
+    setAvatarVisual(item, personalData.avatarPhoto || state.avatarPhoto || "", getInitials(profileName?.value || personalData.name || state.name));
+  });
 }
 
 function showAuthStep(stepName) {
@@ -339,27 +399,28 @@ function handleCodeSubmit(form) {
 function handleProfileSubmit(form) {
   const formData = new FormData(form);
   const name = String(formData.get("name") ?? "").trim();
-  const avatar = String(formData.get("avatar") ?? "").trim().slice(0, 2);
   const partner = String(formData.get("partner") ?? "").trim();
 
-  if (!name || !avatar || !partner) {
-    setAuthStatus("Заполни имя, аватар и имя партнёра.", "profile");
+  if (!name || !partner) {
+    setAuthStatus("Заполни имя и имя партнёра.", "profile");
     return;
   }
 
   const authState = getAuthState();
   const contactField = authState.method === "email" ? "email" : "phone";
   const contactPatch = authState.contact ? { [contactField]: authState.contact } : {};
+  const personalData = readJson(personalStorageKey, {});
+  const avatar = getInitials(name);
 
   writeJson(personalStorageKey, {
-    ...readJson(personalStorageKey, {}),
+    ...personalData,
     ...contactPatch,
     name,
     avatar,
     partner,
   });
 
-  saveAuthState({ name, avatar, partner });
+  saveAuthState({ name, avatar, avatarPhoto: personalData.avatarPhoto || "", partner });
   applyPersonalData();
   setAuthStatus("");
   showAuthStep("setup");
@@ -425,7 +486,6 @@ function handleAuthFormSubmit(form) {
 function applyPersonalData() {
   const data = readJson(personalStorageKey, {});
   const name = data.name || "Александр";
-  const avatar = (data.avatar || "Ал").trim().slice(0, 2) || "Ал";
   const partner = data.partner || "Саша";
 
   document.querySelectorAll("[data-personal-field]").forEach((field) => {
@@ -435,9 +495,7 @@ function applyPersonalData() {
     }
   });
 
-  document.querySelectorAll(".avatar-button, .profile-avatar").forEach((item) => {
-    item.textContent = avatar;
-  });
+  applyAvatarVisuals(data);
 
   document.querySelectorAll(".profile-main h3, .settings-profile-card h2").forEach((item) => {
     item.textContent = name;
@@ -449,18 +507,79 @@ function applyPersonalData() {
 }
 
 function savePersonalData() {
-  const data = {};
+  const data = readJson(personalStorageKey, {});
 
   document.querySelectorAll("[data-personal-field]").forEach((field) => {
     data[field.dataset.personalField] = field.value.trim();
   });
 
+  data.avatar = getInitials(data.name || "Александр");
   writeJson(personalStorageKey, data);
   applyPersonalData();
+  updateAuthUi();
 
   const status = document.getElementById("personalDataStatus");
   if (status) {
     status.textContent = "Сохранено на этом устройстве.";
+  }
+}
+
+async function saveAvatarPhoto(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+
+  const status = document.getElementById("personalDataStatus");
+
+  try {
+    const avatarPhoto = await readImageAsDataUrl(file);
+    const personalData = readJson(personalStorageKey, {});
+    const nextPersonalData = {
+      ...personalData,
+      avatar: getInitials(personalData.name || "Александр"),
+      avatarPhoto,
+    };
+
+    const didSave = writeJson(personalStorageKey, nextPersonalData);
+    saveAuthState({ avatarPhoto });
+    applyPersonalData();
+    updateAuthUi();
+
+    const saveMessage = didSave ? "Фото сохранено на этом устройстве." : "Не удалось сохранить фото на этом устройстве.";
+
+    if (status) {
+      status.textContent = saveMessage;
+    }
+
+    setAuthStatus(didSave ? "Фото добавлено." : "Не удалось сохранить фото.", "profile");
+  } catch (error) {
+    console.error(error);
+
+    if (status) {
+      status.textContent = "Не получилось прочитать фото.";
+    }
+
+    setAuthStatus("Не получилось прочитать фото.", "profile");
+  } finally {
+    input.value = "";
+  }
+}
+
+function removeAvatarPhoto() {
+  const personalData = readJson(personalStorageKey, {});
+  const nextPersonalData = {
+    ...personalData,
+    avatar: getInitials(personalData.name || "Александр"),
+  };
+
+  delete nextPersonalData.avatarPhoto;
+  writeJson(personalStorageKey, nextPersonalData);
+  saveAuthState({ avatarPhoto: "" });
+  applyPersonalData();
+  updateAuthUi();
+
+  const status = document.getElementById("personalDataStatus");
+  if (status) {
+    status.textContent = "Фото удалено. Показываются инициалы из имени.";
   }
 }
 
@@ -887,6 +1006,12 @@ quickForms.forEach((form) => {
 });
 
 document.addEventListener("change", async (event) => {
+  const avatarInput = event.target.closest?.("[data-avatar-photo-input], [data-auth-avatar-input]");
+  if (avatarInput) {
+    await saveAvatarPhoto(avatarInput);
+    return;
+  }
+
   if (event.target.closest?.("[data-notification-key], [data-quiet-hours], [data-summary-time]")) {
     saveNotificationSettings();
   }
@@ -914,6 +1039,11 @@ document.addEventListener("click", (event) => {
   const savePersonalButton = event.target.closest?.("[data-save-personal-data]");
   if (savePersonalButton) {
     savePersonalData();
+  }
+
+  const removeAvatarButton = event.target.closest?.("[data-avatar-photo-remove]");
+  if (removeAvatarButton) {
+    removeAvatarPhoto();
   }
 });
 

@@ -1,4 +1,4 @@
-import { icon, pageShell } from "../components/html.js?v=17";
+import { icon, pageShell } from "../components/html.js?v=18";
 
 const authSteps = [
   { key: "start", label: "Вход" },
@@ -155,16 +155,22 @@ export function renderAuthPage() {
           </article>
 
           <form class="auth-card auth-form" data-auth-form="profile">
-            <div class="auth-grid">
-              <label class="auth-field">
-                <span>Имя</span>
-                <input name="name" type="text" value="Александр" data-auth-profile-name required />
+            <label class="auth-field">
+              <span>Имя</span>
+              <input name="name" type="text" value="Александр" data-auth-profile-name required />
+            </label>
+            <section class="auth-photo-card">
+              <span class="profile-avatar" data-auth-avatar-preview>Ал</span>
+              <div>
+                <strong>Фото профиля</strong>
+                <small>Можно добавить сейчас или позже в личных данных.</small>
+              </div>
+              <label class="auth-photo-upload">
+                ${icon("image-plus")}
+                <span>Загрузить</span>
+                <input type="file" accept="image/*" data-auth-avatar-input />
               </label>
-              <label class="auth-field">
-                <span>Аватар</span>
-                <input name="avatar" type="text" value="Ал" maxlength="2" data-auth-profile-avatar required />
-              </label>
-            </div>
+            </section>
             <label class="auth-field">
               <span>Имя партнёра</span>
               <input name="partner" type="text" value="Саша" data-auth-profile-partner required />
