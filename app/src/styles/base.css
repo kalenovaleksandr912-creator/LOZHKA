@@ -148,7 +148,7 @@ a {
   width: min(430px, 100%);
   min-height: 100svh;
   margin: 0 auto;
-  padding: max(18px, env(safe-area-inset-top)) 18px 118px;
+  padding: max(10px, env(safe-area-inset-top)) 18px 118px;
   background: var(--surface);
   overflow-x: hidden;
 }

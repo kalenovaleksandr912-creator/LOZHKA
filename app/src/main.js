@@ -1,16 +1,16 @@
-import { renderBottomNav, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=19";
-import { renderAuthPage } from "./pages/auth.js?v=19";
-import { renderCalendarPage } from "./pages/calendar.js?v=19";
-import { renderMenuPage } from "./pages/menu.js?v=19";
-import { renderMorePage } from "./pages/more.js?v=19";
-import { renderNotificationsPage } from "./pages/notifications.js?v=19";
-import { renderOurDatesPage } from "./pages/our-dates.js?v=19";
-import { renderPeoplePage } from "./pages/people.js?v=19";
-import { renderPersonalDataPage } from "./pages/personal-data.js?v=19";
-import { renderShoppingPage } from "./pages/shopping.js?v=19";
-import { renderStatsPage } from "./pages/stats.js?v=19";
-import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=19";
-import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=19";
+import { renderBottomNav, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=20";
+import { renderAuthPage } from "./pages/auth.js?v=20";
+import { renderCalendarPage } from "./pages/calendar.js?v=20";
+import { renderMenuPage } from "./pages/menu.js?v=20";
+import { renderMorePage } from "./pages/more.js?v=20";
+import { renderNotificationsPage } from "./pages/notifications.js?v=20";
+import { renderOurDatesPage } from "./pages/our-dates.js?v=20";
+import { renderPeoplePage } from "./pages/people.js?v=20";
+import { renderPersonalDataPage } from "./pages/personal-data.js?v=20";
+import { renderShoppingPage } from "./pages/shopping.js?v=20";
+import { renderStatsPage } from "./pages/stats.js?v=20";
+import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=20";
+import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=20";
 import {
   clearSession,
   completeAuth as completeAuthRequest,
@@ -23,8 +23,8 @@ import {
   updateCurrentSession,
   updateTaskCompletion,
   verifyAuthCode,
-} from "./lib/api.js?v=19";
-import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=19";
+} from "./lib/api.js?v=20";
+import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=20";
 
 const app = document.getElementById("app");
 
