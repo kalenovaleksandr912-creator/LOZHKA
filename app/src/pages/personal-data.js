@@ -1,4 +1,4 @@
-import { escapeHtml, icon, pageShell } from "../components/html.js?v=16";
+import { escapeHtml, icon, pageShell } from "../components/html.js?v=17";
 
 const personalFields = [
   { key: "name", label: "Имя", value: "Александр", placeholder: "Как тебя показывать", icon: "user" },

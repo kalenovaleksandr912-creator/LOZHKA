@@ -1,5 +1,5 @@
-import { statsBreakdown, statsOverview, statsPeople, statsRecent } from "../data/mock-data.js?v=16";
-import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=16";
+import { statsBreakdown, statsOverview, statsPeople, statsRecent } from "../data/mock-data.js?v=17";
+import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=17";
 
 function renderOverviewCard(item) {
   return `

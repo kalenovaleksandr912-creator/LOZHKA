@@ -1,21 +1,23 @@
-import { renderBottomNav, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=16";
-import { renderCalendarPage } from "./pages/calendar.js?v=16";
-import { renderMenuPage } from "./pages/menu.js?v=16";
-import { renderMorePage } from "./pages/more.js?v=16";
-import { renderNotificationsPage } from "./pages/notifications.js?v=16";
-import { renderOurDatesPage } from "./pages/our-dates.js?v=16";
-import { renderPeoplePage } from "./pages/people.js?v=16";
-import { renderPersonalDataPage } from "./pages/personal-data.js?v=16";
-import { renderShoppingPage } from "./pages/shopping.js?v=16";
-import { renderStatsPage } from "./pages/stats.js?v=16";
-import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=16";
-import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=16";
-import { createTask, fetchTasks, updateTaskCompletion } from "./lib/api.js?v=16";
-import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=16";
+import { renderBottomNav, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=17";
+import { renderAuthPage } from "./pages/auth.js?v=17";
+import { renderCalendarPage } from "./pages/calendar.js?v=17";
+import { renderMenuPage } from "./pages/menu.js?v=17";
+import { renderMorePage } from "./pages/more.js?v=17";
+import { renderNotificationsPage } from "./pages/notifications.js?v=17";
+import { renderOurDatesPage } from "./pages/our-dates.js?v=17";
+import { renderPeoplePage } from "./pages/people.js?v=17";
+import { renderPersonalDataPage } from "./pages/personal-data.js?v=17";
+import { renderShoppingPage } from "./pages/shopping.js?v=17";
+import { renderStatsPage } from "./pages/stats.js?v=17";
+import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=17";
+import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=17";
+import { createTask, fetchTasks, updateTaskCompletion } from "./lib/api.js?v=17";
+import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=17";
 
 const app = document.getElementById("app");
 
 app.innerHTML = `
+  ${renderAuthPage()}
   ${renderTodayPage()}
   ${renderTasksPage()}
   ${renderCalendarPage()}
@@ -34,6 +36,7 @@ app.innerHTML = `
 
 const navItems = Array.from(document.querySelectorAll(".nav-item"));
 const pages = Array.from(document.querySelectorAll(".app-page"));
+const bottomNav = document.querySelector(".bottom-nav");
 const addButtons = Array.from(document.querySelectorAll(".add-button"));
 const quickSheet = document.getElementById("quickSheet");
 const sheetBackdrop = document.getElementById("sheetBackdrop");
@@ -63,10 +66,13 @@ let lastSheetTrigger = document.getElementById("openQuickAdd");
 let lastProfileTrigger = null;
 let taskState = [];
 const secondaryPages = new Set(["menu", "shopping", "stats", "people", "personal-data", "our-dates", "notifications"]);
+const authPages = new Set(["auth"]);
 const themeStorageKey = "lozhka-theme";
+const authStorageKey = "lozhka-auth-state";
 const personalStorageKey = "lozhka-personal-data";
 const notificationsStorageKey = "lozhka-notifications";
 const availableThemes = new Set(["dark", "rose"]);
+const authStepOrder = ["start", "code", "profile", "setup", "invite"];
 
 const calendarViewLabels = {
   month: "Месяц",
@@ -130,6 +136,289 @@ function writeJson(key, value) {
     window.localStorage.setItem(key, JSON.stringify(value));
   } catch {
     // Local preferences remain interactive even if storage is unavailable.
+  }
+}
+
+function createInviteCode() {
+  return `LOZHKA-${Math.floor(1000 + Math.random() * 9000)}`;
+}
+
+function getAuthState() {
+  return readJson(authStorageKey, {
+    method: "phone",
+    mode: "create",
+  });
+}
+
+function saveAuthState(patch) {
+  const state = {
+    ...getAuthState(),
+    ...patch,
+  };
+
+  writeJson(authStorageKey, state);
+  return state;
+}
+
+function ensureInviteCode() {
+  const state = getAuthState();
+  if (state.inviteCode) {
+    return state.inviteCode;
+  }
+
+  const inviteCode = createInviteCode();
+  saveAuthState({ inviteCode });
+  return inviteCode;
+}
+
+function setAuthStatus(text, screenName) {
+  if (!text) {
+    document.querySelectorAll(".auth-status").forEach((status) => {
+      status.textContent = "";
+    });
+    return;
+  }
+
+  const activeScreen = screenName
+    ? document.querySelector(`[data-auth-screen="${screenName}"]`)
+    : document.querySelector(".auth-screen.is-active");
+  const status = activeScreen?.querySelector(".auth-status") ?? document.getElementById("authStatus");
+
+  if (status) {
+    status.textContent = text;
+  }
+}
+
+function updateAuthUi() {
+  const state = getAuthState();
+  const method = state.method === "email" ? "email" : "phone";
+  const label = method === "email" ? "Почта" : "Телефон";
+  const placeholder = method === "email" ? "name@example.com" : "+7 999 000-00-00";
+  const inputType = method === "email" ? "email" : "tel";
+  const inputMode = method === "email" ? "email" : "tel";
+
+  document.querySelectorAll("[data-auth-method-choice]").forEach((button) => {
+    const isActive = button.dataset.authMethodChoice === method;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+
+  document.querySelectorAll("[data-auth-contact-label]").forEach((item) => {
+    item.textContent = label;
+  });
+
+  document.querySelectorAll("[data-auth-contact-input]").forEach((field) => {
+    field.type = inputType;
+    field.inputMode = inputMode;
+    field.placeholder = placeholder;
+
+    if (state.contact) {
+      field.value = state.contact;
+    }
+  });
+
+  document.querySelectorAll("[data-auth-contact-preview]").forEach((item) => {
+    item.textContent = state.contact || "указанный контакт";
+  });
+
+  document.querySelectorAll("[data-auth-invite-code]").forEach((item) => {
+    item.textContent = ensureInviteCode();
+  });
+
+  document.querySelectorAll("[data-auth-close]").forEach((button) => {
+    button.hidden = !state.completed;
+  });
+
+  const personalData = readJson(personalStorageKey, {});
+  const profileName = document.querySelector("[data-auth-profile-name]");
+  const profileAvatar = document.querySelector("[data-auth-profile-avatar]");
+  const profilePartner = document.querySelector("[data-auth-profile-partner]");
+
+  if (profileName && personalData.name) {
+    profileName.value = personalData.name;
+  }
+
+  if (profileAvatar && personalData.avatar) {
+    profileAvatar.value = personalData.avatar;
+  }
+
+  if (profilePartner && personalData.partner) {
+    profilePartner.value = personalData.partner;
+  }
+}
+
+function showAuthStep(stepName) {
+  const targetStep = authStepOrder.includes(stepName) || stepName === "join" ? stepName : "start";
+  const progressStep = targetStep === "join" ? "start" : targetStep;
+  const targetIndex = authStepOrder.indexOf(progressStep);
+
+  document.querySelectorAll("[data-auth-screen]").forEach((screen) => {
+    const isActive = screen.dataset.authScreen === targetStep;
+    screen.hidden = !isActive;
+    screen.classList.toggle("is-active", isActive);
+  });
+
+  document.querySelectorAll("[data-auth-dot]").forEach((dot) => {
+    const dotIndex = authStepOrder.indexOf(dot.dataset.authDot);
+    dot.classList.toggle("is-active", dot.dataset.authDot === progressStep);
+    dot.classList.toggle("is-done", targetIndex > dotIndex && dotIndex >= 0);
+  });
+
+  updateAuthUi();
+  refreshIcons();
+  window.scrollTo(0, 0);
+}
+
+function completeAuth(mode = "ready") {
+  saveAuthState({
+    authenticated: true,
+    completed: true,
+    completedAt: new Date().toISOString(),
+    mode,
+  });
+
+  applyPersonalData();
+  applyNotificationSettings();
+  showPage("today");
+}
+
+function handleContactSubmit(form) {
+  const formData = new FormData(form);
+  const contact = String(formData.get("contact") ?? "").trim();
+
+  if (!contact) {
+    setAuthStatus("Укажи телефон или почту.", "start");
+    return;
+  }
+
+  saveAuthState({
+    mode: "create",
+    contact,
+    codeSent: true,
+  });
+
+  setAuthStatus("");
+  showAuthStep("code");
+}
+
+function handleJoinSubmit(form) {
+  const formData = new FormData(form);
+  const contact = String(formData.get("contact") ?? "").trim();
+  const partnerCode = String(formData.get("inviteCode") ?? "").trim().toUpperCase();
+
+  if (!partnerCode || !contact) {
+    setAuthStatus("Нужен код партнёра и контакт для входа.", "join");
+    return;
+  }
+
+  saveAuthState({
+    mode: "join",
+    contact,
+    partnerCode,
+    codeSent: true,
+  });
+
+  setAuthStatus("");
+  showAuthStep("code");
+}
+
+function handleCodeSubmit(form) {
+  const formData = new FormData(form);
+  const code = String(formData.get("code") ?? "").trim();
+
+  if (code.length < 4) {
+    setAuthStatus("Код должен быть не короче 4 цифр.", "code");
+    return;
+  }
+
+  saveAuthState({ verified: true });
+  setAuthStatus("");
+  showAuthStep("profile");
+}
+
+function handleProfileSubmit(form) {
+  const formData = new FormData(form);
+  const name = String(formData.get("name") ?? "").trim();
+  const avatar = String(formData.get("avatar") ?? "").trim().slice(0, 2);
+  const partner = String(formData.get("partner") ?? "").trim();
+
+  if (!name || !avatar || !partner) {
+    setAuthStatus("Заполни имя, аватар и имя партнёра.", "profile");
+    return;
+  }
+
+  const authState = getAuthState();
+  const contactField = authState.method === "email" ? "email" : "phone";
+  const contactPatch = authState.contact ? { [contactField]: authState.contact } : {};
+
+  writeJson(personalStorageKey, {
+    ...readJson(personalStorageKey, {}),
+    ...contactPatch,
+    name,
+    avatar,
+    partner,
+  });
+
+  saveAuthState({ name, avatar, partner });
+  applyPersonalData();
+  setAuthStatus("");
+  showAuthStep("setup");
+}
+
+function handleSetupSubmit(form) {
+  const formData = new FormData(form);
+  const spaceName = String(formData.get("spaceName") ?? "").trim() || "LOZHKA";
+  const startDate = String(formData.get("startDate") ?? "").trim();
+  const themePreference = String(formData.get("theme") ?? "dark");
+  const summaryTime = String(formData.get("summaryTime") ?? "09:00");
+  const state = saveAuthState({
+    spaceName,
+    startDate,
+    themePreference,
+    summaryTime,
+    inviteCode: getAuthState().inviteCode || createInviteCode(),
+  });
+
+  writeJson(notificationsStorageKey, {
+    ...getNotificationSettings(),
+    summaryTime,
+  });
+  applyTheme(themePreference);
+  applyNotificationSettings();
+
+  if (state.mode === "join") {
+    completeAuth("join");
+    return;
+  }
+
+  showAuthStep("invite");
+}
+
+function handleAuthFormSubmit(form) {
+  const formName = form.dataset.authForm;
+
+  if (formName === "contact") {
+    handleContactSubmit(form);
+    return;
+  }
+
+  if (formName === "join") {
+    handleJoinSubmit(form);
+    return;
+  }
+
+  if (formName === "code") {
+    handleCodeSubmit(form);
+    return;
+  }
+
+  if (formName === "profile") {
+    handleProfileSubmit(form);
+    return;
+  }
+
+  if (formName === "setup") {
+    handleSetupSubmit(form);
   }
 }
 
@@ -301,6 +590,10 @@ function showPage(pageName) {
 
   const currentNavPage = secondaryPages.has(pageName) ? "more" : pageName;
 
+  if (bottomNav) {
+    bottomNav.hidden = authPages.has(pageName);
+  }
+
   navItems.forEach((item) => {
     const isActive = item.dataset.page === currentNavPage;
     item.classList.toggle("is-active", isActive);
@@ -465,6 +758,10 @@ document.addEventListener("click", (event) => {
   if (targetPageControl) {
     showPage(targetPageControl.dataset.targetPage);
 
+    if (targetPageControl.dataset.targetPage === "auth") {
+      showAuthStep("start");
+    }
+
     if (profileSheet?.contains(targetPageControl)) {
       setProfileOpen(false);
     }
@@ -477,6 +774,72 @@ document.addEventListener("click", (event) => {
   if (tomorrowCard) {
     showPage("calendar");
     showCalendarView("day");
+  }
+});
+
+document.addEventListener("submit", (event) => {
+  const authForm = event.target.closest?.("[data-auth-form]");
+
+  if (!authForm) return;
+
+  event.preventDefault();
+  handleAuthFormSubmit(authForm);
+});
+
+document.addEventListener("click", async (event) => {
+  const authMethodButton = event.target.closest?.("[data-auth-method-choice]");
+  const authStepButton = event.target.closest?.("[data-auth-step]");
+  const authResendButton = event.target.closest?.("[data-auth-resend]");
+  const authCopyButton = event.target.closest?.("[data-auth-copy-code]");
+  const authFinishButton = event.target.closest?.("[data-auth-finish]");
+  const authDemoButton = event.target.closest?.("[data-auth-demo]");
+  const authCloseButton = event.target.closest?.("[data-auth-close]");
+
+  if (authMethodButton) {
+    saveAuthState({ method: authMethodButton.dataset.authMethodChoice });
+    updateAuthUi();
+  }
+
+  if (authStepButton) {
+    const nextStep = authStepButton.dataset.authStep;
+    saveAuthState({ mode: nextStep === "join" ? "join" : "create" });
+    setAuthStatus("");
+    showAuthStep(nextStep);
+  }
+
+  if (authResendButton) {
+    saveAuthState({ codeSent: true });
+    setAuthStatus("Код отправлен ещё раз.", "code");
+  }
+
+  if (authCopyButton) {
+    const inviteCode = ensureInviteCode();
+
+    try {
+      await window.navigator.clipboard.writeText(inviteCode);
+      setAuthStatus("Код скопирован.", "invite");
+    } catch {
+      setAuthStatus(`Код: ${inviteCode}`, "invite");
+    }
+  }
+
+  if (authFinishButton) {
+    completeAuth("create");
+  }
+
+  if (authDemoButton) {
+    saveAuthState({
+      authenticated: true,
+      completed: true,
+      mode: "demo",
+      contact: "demo@lozhka.local",
+      inviteCode: ensureInviteCode(),
+    });
+    showPage("today");
+  }
+
+  if (authCloseButton) {
+    showPage("today");
   }
 });
 photoCloseButtons.forEach((button) => {
@@ -590,10 +953,12 @@ window.addEventListener("load", () => {
   applyTheme(getSavedTheme());
   applyPersonalData();
   applyNotificationSettings();
+  updateAuthUi();
   refreshIcons();
   updateDots();
   showCalendarView("week");
   showShoppingTab("today");
+  showPage(getAuthState().completed ? "today" : "auth");
   loadTasks().catch((error) => {
     console.warn("Tasks API is unavailable, mock tasks stay visible.", error);
   });

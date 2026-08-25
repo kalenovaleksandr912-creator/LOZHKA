@@ -1,4 +1,4 @@
-import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=16";
+import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=17";
 
 const dateStats = [
   { value: "657", label: "дней вместе" },

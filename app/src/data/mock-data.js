@@ -136,6 +136,7 @@ export const moreGroups = [
     label: "Система",
     title: "Настройки",
     items: [
+      { icon: "key-round", tone: "lavender", title: "Вход и пара", details: "Регистрация, код партнёра и вход", targetPage: "auth" },
       { icon: "user", tone: "blue", title: "Личные данные", details: "Имя, аватар и роль", targetPage: "personal-data" },
       { icon: "bell", tone: "green", title: "Уведомления", details: "Задачи, покупки и календарь", targetPage: "notifications" },
       { icon: "heart", tone: "rose", title: "Наши даты", details: "Годовщины и личные события", targetPage: "our-dates" },
