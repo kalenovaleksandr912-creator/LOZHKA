@@ -1,17 +1,17 @@
-import { renderBottomNav, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=15";
-import { renderCalendarPage } from "./pages/calendar.js?v=15";
-import { renderMenuPage } from "./pages/menu.js?v=15";
-import { renderMorePage } from "./pages/more.js?v=15";
-import { renderNotificationsPage } from "./pages/notifications.js?v=15";
-import { renderOurDatesPage } from "./pages/our-dates.js?v=15";
-import { renderPeoplePage } from "./pages/people.js?v=15";
-import { renderPersonalDataPage } from "./pages/personal-data.js?v=15";
-import { renderShoppingPage } from "./pages/shopping.js?v=15";
-import { renderStatsPage } from "./pages/stats.js?v=15";
-import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=15";
-import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=15";
-import { createTask, fetchTasks, updateTaskCompletion } from "./lib/api.js?v=15";
-import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=15";
+import { renderBottomNav, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=16";
+import { renderCalendarPage } from "./pages/calendar.js?v=16";
+import { renderMenuPage } from "./pages/menu.js?v=16";
+import { renderMorePage } from "./pages/more.js?v=16";
+import { renderNotificationsPage } from "./pages/notifications.js?v=16";
+import { renderOurDatesPage } from "./pages/our-dates.js?v=16";
+import { renderPeoplePage } from "./pages/people.js?v=16";
+import { renderPersonalDataPage } from "./pages/personal-data.js?v=16";
+import { renderShoppingPage } from "./pages/shopping.js?v=16";
+import { renderStatsPage } from "./pages/stats.js?v=16";
+import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=16";
+import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=16";
+import { createTask, fetchTasks, updateTaskCompletion } from "./lib/api.js?v=16";
+import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=16";
 
 const app = document.getElementById("app");
 

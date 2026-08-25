@@ -1,4 +1,4 @@
-import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=15";
+import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=16";
 
 const notificationGroups = [
   {

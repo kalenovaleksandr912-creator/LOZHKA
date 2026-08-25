@@ -1,4 +1,4 @@
-import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=15";
+import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=16";
 
 const dateStats = [
   { value: "657", label: "дней вместе" },
@@ -38,9 +38,6 @@ function renderDateCard(item) {
         <time>${escapeHtml(item.date)}</time>
         <small>${escapeHtml(item.details)}</small>
       </div>
-      <button class="icon-button" type="button" aria-label="Редактировать ${escapeHtml(item.title)}">
-        ${icon("pencil")}
-      </button>
     </article>
   `;
 }
@@ -58,8 +55,8 @@ export function renderOurDatesPage() {
           <p>Профиль</p>
           <h1>Наши даты</h1>
         </div>
-        <button class="icon-button" type="button" aria-label="Добавить дату">
-          ${icon("plus")}
+        <button class="icon-button" type="button" aria-label="Открыть профиль" data-profile-open>
+          ${icon("user")}
         </button>
       </section>
 
