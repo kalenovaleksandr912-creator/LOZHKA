@@ -1,5 +1,5 @@
-import { people } from "../data/mock-data.js?v=18";
-import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=18";
+import { people } from "../data/mock-data.js?v=19";
+import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=19";
 
 function renderPersonCard(person) {
   return `

@@ -10,7 +10,7 @@
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
-    "check": "node --check src/server.js && node --check src/app.js && node --check src/routes/today.js && node --check src/routes/tasks.js && node --check src/routes/calendar.js && node --check src/routes/menu.js && node --check src/routes/shopping.js && node --check src/routes/people.js && node --check src/routes/stats.js && node --check prisma/seed.js"
+    "check": "node --check src/server.js && node --check src/app.js && node --check src/lib/request-context.js && node --check src/routes/auth.js && node --check src/routes/today.js && node --check src/routes/tasks.js && node --check src/routes/calendar.js && node --check src/routes/menu.js && node --check src/routes/shopping.js && node --check src/routes/people.js && node --check src/routes/stats.js && node --check prisma/seed.js"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.2",

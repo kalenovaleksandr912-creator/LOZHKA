@@ -69,32 +69,53 @@ enum OperationType {
   DAILY_PHOTO_ADDED
 }
 
+enum AuthContactType {
+  EMAIL
+  PHONE
+}
+
+enum AuthCodePurpose {
+  LOGIN
+}
+
 model User {
-  id             String             @id @default(cuid())
-  email          String             @unique
-  name           String
-  avatarInitials String?
-  createdAt      DateTime           @default(now())
-  memberships    SpaceMember[]
-  createdTasks   Task[]             @relation("TaskCreatedBy")
-  assignedTasks  Task[]             @relation("TaskAssignee")
-  completedTasks Task[]             @relation("TaskCompletedBy")
-  createdEvents  Event[]            @relation("EventCreatedBy")
-  createdDishes  Dish[]             @relation("DishCreatedBy")
-  createdMenu    MenuPlanItem[]     @relation("MenuCreatedBy")
-  createdShopping ShoppingItem[]     @relation("ShoppingCreatedBy")
-  dailyPhotos    DailyPhoto[]
-  operationLogs  OperationLog[]
+  id              String         @id @default(cuid())
+  email           String?        @unique
+  phone           String?        @unique
+  name            String
+  avatarInitials  String?
+  avatarPhoto     String?        @db.Text
+  partnerName     String?
+  profileSettings Json?
+  lastLoginAt     DateTime?
+  createdAt       DateTime       @default(now())
+  memberships     SpaceMember[]
+  sessions        Session[]
+  createdTasks    Task[]         @relation("TaskCreatedBy")
+  assignedTasks   Task[]         @relation("TaskAssignee")
+  completedTasks  Task[]         @relation("TaskCompletedBy")
+  createdEvents   Event[]        @relation("EventCreatedBy")
+  createdDishes   Dish[]         @relation("DishCreatedBy")
+  createdMenu     MenuPlanItem[] @relation("MenuCreatedBy")
+  createdShopping ShoppingItem[] @relation("ShoppingCreatedBy")
+  dailyPhotos     DailyPhoto[]
+  operationLogs   OperationLog[]
 }
 
 model Space {
   id                    String             @id @default(cuid())
+  name                  String             @default("LOZHKA")
   inviteCode            String?            @unique
+  partnerNameHint       String?
+  themePreference       String?
+  dailySummaryTime      String?
+  notificationSettings  Json?
   relationshipStartDate DateTime?          @db.Date
   weddingDate           DateTime?          @db.Date
   createdAt             DateTime           @default(now())
   updatedAt             DateTime           @updatedAt
   memberships           SpaceMember[]
+  sessions              Session[]
   tasks                 Task[]
   events                Event[]
   dishes                Dish[]
@@ -107,37 +128,68 @@ model Space {
 }
 
 model SpaceMember {
-  id        String    @id @default(cuid())
-  space     Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  spaceId   String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  role      SpaceRole @default(MEMBER)
-  color     String?
-  joinedAt  DateTime  @default(now())
+  id       String    @id @default(cuid())
+  space    Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  spaceId  String
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  role     SpaceRole @default(MEMBER)
+  color    String?
+  joinedAt DateTime  @default(now())
 
   @@unique([spaceId, userId])
 }
 
+model AuthCode {
+  id          String          @id @default(cuid())
+  contactType AuthContactType
+  contact     String
+  code        String
+  purpose     AuthCodePurpose @default(LOGIN)
+  expiresAt   DateTime
+  verifiedAt  DateTime?
+  consumedAt  DateTime?
+  createdAt   DateTime        @default(now())
+
+  @@index([contactType, contact, code])
+  @@index([expiresAt])
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  token      String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  space      Space?   @relation(fields: [spaceId], references: [id], onDelete: SetNull)
+  spaceId    String?
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([spaceId])
+  @@index([expiresAt])
+}
+
 model Task {
-  id             String            @id @default(cuid())
-  space          Space             @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  id             String           @id @default(cuid())
+  space          Space            @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   spaceId        String
   title          String
   details        String?
-  status         TaskStatus        @default(ACTIVE)
-  category       TaskCategory      @default(OTHER)
-  assigneeType   TaskAssigneeType  @default(UNASSIGNED)
-  assigneeUser   User?             @relation("TaskAssignee", fields: [assigneeUserId], references: [id])
+  status         TaskStatus       @default(ACTIVE)
+  category       TaskCategory     @default(OTHER)
+  assigneeType   TaskAssigneeType @default(UNASSIGNED)
+  assigneeUser   User?            @relation("TaskAssignee", fields: [assigneeUserId], references: [id])
   assigneeUserId String?
-  deadline       DateTime?         @db.Date
-  createdBy      User?             @relation("TaskCreatedBy", fields: [createdById], references: [id])
+  deadline       DateTime?        @db.Date
+  createdBy      User?            @relation("TaskCreatedBy", fields: [createdById], references: [id])
   createdById    String?
-  completedBy    User?             @relation("TaskCompletedBy", fields: [completedById], references: [id])
+  completedBy    User?            @relation("TaskCompletedBy", fields: [completedById], references: [id])
   completedById  String?
   completedAt    DateTime?
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
   deletedAt      DateTime?
 
   @@index([spaceId, deadline])
@@ -178,8 +230,8 @@ model Dish {
 }
 
 model DishIngredient {
-  id     String @id @default(cuid())
-  dish   Dish   @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  id     String  @id @default(cuid())
+  dish   Dish    @relation(fields: [dishId], references: [id], onDelete: Cascade)
   dishId String
   name   String
   amount String?
@@ -203,23 +255,23 @@ model MenuPlanItem {
 }
 
 model ShoppingItem {
-  id               String            @id @default(cuid())
-  space            Space             @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  id               String           @id @default(cuid())
+  space            Space            @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   spaceId          String
   title            String
   amount           String?
   note             String?
-  category         ShoppingCategory  @default(OTHER)
-  shoppingDate     DateTime?         @db.Date
-  status           ShoppingStatus    @default(ACTIVE)
-  source           ShoppingSource    @default(MANUAL)
-  sourceMenuPlan   MenuPlanItem?     @relation(fields: [sourceMenuPlanId], references: [id])
+  category         ShoppingCategory @default(OTHER)
+  shoppingDate     DateTime?        @db.Date
+  status           ShoppingStatus   @default(ACTIVE)
+  source           ShoppingSource   @default(MANUAL)
+  sourceMenuPlan   MenuPlanItem?    @relation(fields: [sourceMenuPlanId], references: [id])
   sourceMenuPlanId String?
-  createdBy        User?             @relation("ShoppingCreatedBy", fields: [createdById], references: [id])
+  createdBy        User?            @relation("ShoppingCreatedBy", fields: [createdById], references: [id])
   createdById      String?
   completedAt      DateTime?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
   deletedAt        DateTime?
 
   @@index([spaceId, shoppingDate])

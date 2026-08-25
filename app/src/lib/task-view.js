@@ -10,6 +10,15 @@ const userNameFallback = {
   "demo-nastya": "Настя",
 };
 
+function readSession() {
+  try {
+    const value = window.localStorage.getItem("lozhka-session");
+    return value ? JSON.parse(value) : null;
+  } catch {
+    return null;
+  }
+}
+
 function formatDateLabel(value, completed) {
   if (completed) return "Выполнено";
   if (!value) return "Без срока";
@@ -32,7 +41,20 @@ function getAssignee(task) {
 function getOwner(task) {
   if (task.owner) return task.owner;
   if (task.assigneeType === "SHARED") return "shared";
-  if (task.assigneeType === "USER") return userIdToOwner[task.assigneeUserId] ?? "me";
+  if (task.assigneeType === "USER") {
+    const session = readSession();
+
+    if (session?.user?.id && task.assigneeUserId === session.user.id) {
+      return "me";
+    }
+
+    if (session?.spaceMembers?.some((member) => member.userId === task.assigneeUserId)) {
+      return "her";
+    }
+
+    return userIdToOwner[task.assigneeUserId] ?? "me";
+  }
+
   return "shared";
 }
 

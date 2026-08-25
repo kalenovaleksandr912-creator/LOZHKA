@@ -3,13 +3,13 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: lozhka
-      POSTGRES_USER: lozhka
+      POSTGRES_DB: ${POSTGRES_DB:-lozhka}
+      POSTGRES_USER: ${POSTGRES_USER:-lozhka}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U lozhka -d lozhka"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lozhka} -d ${POSTGRES_DB:-lozhka}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22,7 +22,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://lozhka:${POSTGRES_PASSWORD}@postgres:5432/lozhka?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-lozhka}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-lozhka}?schema=public
       DEFAULT_SPACE_ID: demo-space
       DEFAULT_USER_ID: demo-alex
       FRONTEND_ORIGIN: http://200.165.229.186

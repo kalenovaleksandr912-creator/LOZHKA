@@ -63,9 +63,28 @@ Default API URL:
 http://localhost:4000
 ```
 
+## Auth
+
+The first auth layer uses a passwordless code:
+
+- `POST /api/auth/request-code`
+- `POST /api/auth/verify-code`
+- `POST /api/auth/complete`
+- `GET /api/auth/me`
+- `PATCH /api/auth/me`
+- `POST /api/auth/logout`
+
+For the prototype, `request-code` returns `debugCode` in the response instead of sending SMS/email.
+Codes and session tokens are stored plainly for now; before production launch they should be hashed and sent through a real SMS/email provider.
+Use the returned session token as:
+
+```text
+Authorization: Bearer <token>
+```
+
 ## Demo Context
 
-Until auth is implemented, routes use a demo space and user:
+Routes still fall back to a demo space and user when no auth token is provided:
 
 - `DEFAULT_SPACE_ID=demo-space`
 - `DEFAULT_USER_ID=demo-alex`

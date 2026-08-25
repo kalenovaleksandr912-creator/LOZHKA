@@ -1,6 +1,8 @@
 import cors from "@fastify/cors";
 import Fastify from "fastify";
 import { prisma } from "./lib/prisma.js";
+import { attachRequestContext } from "./lib/request-context.js";
+import { authRoutes } from "./routes/auth.js";
 import { calendarRoutes } from "./routes/calendar.js";
 import { menuRoutes } from "./routes/menu.js";
 import { peopleRoutes } from "./routes/people.js";
@@ -18,11 +20,14 @@ export async function buildApp(options = {}) {
     origin: process.env.FRONTEND_ORIGIN?.split(",") ?? true,
   });
 
+  app.addHook("onRequest", attachRequestContext);
+
   app.get("/health", async () => ({
     ok: true,
     service: "lozhka-backend",
   }));
 
+  await app.register(authRoutes, { prefix: "/api" });
   await app.register(todayRoutes, { prefix: "/api" });
   await app.register(tasksRoutes, { prefix: "/api" });
   await app.register(calendarRoutes, { prefix: "/api" });

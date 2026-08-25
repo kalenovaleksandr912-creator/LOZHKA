@@ -1,18 +1,30 @@
-import { renderBottomNav, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=18";
-import { renderAuthPage } from "./pages/auth.js?v=18";
-import { renderCalendarPage } from "./pages/calendar.js?v=18";
-import { renderMenuPage } from "./pages/menu.js?v=18";
-import { renderMorePage } from "./pages/more.js?v=18";
-import { renderNotificationsPage } from "./pages/notifications.js?v=18";
-import { renderOurDatesPage } from "./pages/our-dates.js?v=18";
-import { renderPeoplePage } from "./pages/people.js?v=18";
-import { renderPersonalDataPage } from "./pages/personal-data.js?v=18";
-import { renderShoppingPage } from "./pages/shopping.js?v=18";
-import { renderStatsPage } from "./pages/stats.js?v=18";
-import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=18";
-import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=18";
-import { createTask, fetchTasks, updateTaskCompletion } from "./lib/api.js?v=18";
-import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=18";
+import { renderBottomNav, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=19";
+import { renderAuthPage } from "./pages/auth.js?v=19";
+import { renderCalendarPage } from "./pages/calendar.js?v=19";
+import { renderMenuPage } from "./pages/menu.js?v=19";
+import { renderMorePage } from "./pages/more.js?v=19";
+import { renderNotificationsPage } from "./pages/notifications.js?v=19";
+import { renderOurDatesPage } from "./pages/our-dates.js?v=19";
+import { renderPeoplePage } from "./pages/people.js?v=19";
+import { renderPersonalDataPage } from "./pages/personal-data.js?v=19";
+import { renderShoppingPage } from "./pages/shopping.js?v=19";
+import { renderStatsPage } from "./pages/stats.js?v=19";
+import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=19";
+import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=19";
+import {
+  clearSession,
+  completeAuth as completeAuthRequest,
+  createTask,
+  fetchCurrentSession,
+  fetchTasks,
+  getSession,
+  requestAuthCode,
+  saveSession,
+  updateCurrentSession,
+  updateTaskCompletion,
+  verifyAuthCode,
+} from "./lib/api.js?v=19";
+import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=19";
 
 const app = document.getElementById("app");
 
@@ -154,6 +166,10 @@ function getInitials(name) {
   return (parts[0]?.slice(0, 2) || "Ал").toLocaleUpperCase("ru-RU");
 }
 
+function isoDateOnly(value) {
+  return value ? String(value).slice(0, 10) : "";
+}
+
 function setAvatarVisual(element, photoUrl, initials) {
   const hasPhoto = Boolean(photoUrl);
 
@@ -250,6 +266,89 @@ function setAuthStatus(text, screenName) {
   }
 }
 
+function syncSessionData(session) {
+  if (!session?.user) return;
+
+  saveSession(session);
+
+  const user = session.user;
+  const space = session.space;
+  const existingPersonalData = readJson(personalStorageKey, {});
+  const profileSettings = user.profileSettings && typeof user.profileSettings === "object" ? user.profileSettings : {};
+  const partner = user.partnerName || space?.partnerNameHint || existingPersonalData.partner || "Саша";
+  const method = user.email ? "email" : "phone";
+  const contact = user.email || user.phone || "";
+
+  writeJson(personalStorageKey, {
+    ...existingPersonalData,
+    name: user.name,
+    avatar: user.avatarInitials || getInitials(user.name),
+    avatarPhoto: user.avatarPhoto || "",
+    partner,
+    phone: user.phone || existingPersonalData.phone || "",
+    email: user.email || existingPersonalData.email || "",
+    birthday: profileSettings.birthday || existingPersonalData.birthday || "",
+    role: profileSettings.role || existingPersonalData.role || "Мой профиль",
+  });
+
+  if (space?.dailySummaryTime || space?.notificationSettings) {
+    const notificationSettings =
+      space.notificationSettings && typeof space.notificationSettings === "object" ? space.notificationSettings : {};
+
+    writeJson(notificationsStorageKey, {
+      ...getNotificationSettings(),
+      ...notificationSettings,
+      ...(space.dailySummaryTime ? { summaryTime: space.dailySummaryTime } : {}),
+    });
+  }
+
+  saveAuthState({
+    authenticated: true,
+    completed: true,
+    method,
+    contact,
+    inviteCode: space?.inviteCode || getAuthState().inviteCode,
+    spaceName: space?.name || "LOZHKA",
+    startDate: isoDateOnly(space?.relationshipStartDate),
+    themePreference: space?.themePreference || getSavedTheme(),
+    summaryTime: space?.dailySummaryTime || getNotificationSettings().summaryTime || "09:00",
+  });
+
+  if (space?.themePreference) {
+    applyTheme(space.themePreference);
+  }
+
+  applyPersonalData();
+  applyNotificationSettings();
+  updateAuthUi();
+}
+
+async function persistSessionPatch(payload) {
+  if (!getSession()?.token) {
+    return null;
+  }
+
+  const session = await updateCurrentSession(payload);
+  syncSessionData(session);
+  return session;
+}
+
+async function hydrateSession() {
+  if (!getSession()?.token) {
+    return false;
+  }
+
+  try {
+    const session = await fetchCurrentSession();
+    syncSessionData(session);
+    return true;
+  } catch (error) {
+    console.warn("Stored session is unavailable.", error);
+    clearSession();
+    return false;
+  }
+}
+
 function updateAuthUi() {
   const state = getAuthState();
   const method = state.method === "email" ? "email" : "phone";
@@ -302,6 +401,30 @@ function updateAuthUi() {
     profilePartner.value = personalData.partner;
   }
 
+  document.querySelectorAll("[data-auth-space-name]").forEach((field) => {
+    if (state.spaceName) {
+      field.value = state.spaceName;
+    }
+  });
+
+  document.querySelectorAll('[data-auth-form="setup"] input[name="startDate"]').forEach((field) => {
+    if (state.startDate) {
+      field.value = state.startDate;
+    }
+  });
+
+  document.querySelectorAll('[data-auth-form="setup"] select[name="theme"]').forEach((field) => {
+    if (state.themePreference) {
+      field.value = state.themePreference;
+    }
+  });
+
+  document.querySelectorAll('[data-auth-form="setup"] input[name="summaryTime"]').forEach((field) => {
+    if (state.summaryTime) {
+      field.value = state.summaryTime;
+    }
+  });
+
   document.querySelectorAll("[data-auth-avatar-preview]").forEach((item) => {
     setAvatarVisual(item, personalData.avatarPhoto || state.avatarPhoto || "", getInitials(profileName?.value || personalData.name || state.name));
   });
@@ -342,58 +465,145 @@ function completeAuth(mode = "ready") {
   showPage("today");
 }
 
-function handleContactSubmit(form) {
+async function handleContactSubmit(form) {
   const formData = new FormData(form);
   const contact = String(formData.get("contact") ?? "").trim();
+  const method = getAuthState().method || "phone";
 
   if (!contact) {
     setAuthStatus("Укажи телефон или почту.", "start");
     return;
   }
 
-  saveAuthState({
-    mode: "create",
-    contact,
-    codeSent: true,
-  });
+  setAuthStatus("Отправляю код...", "start");
 
-  setAuthStatus("");
-  showAuthStep("code");
+  try {
+    const response = await requestAuthCode({ method, contact });
+
+    saveAuthState({
+      mode: "create",
+      method: response.contactType?.toLowerCase() || method,
+      contact: response.contact || contact,
+      codeSent: true,
+      debugCode: response.debugCode,
+      authCodeId: null,
+      hasExistingSpace: false,
+      partnerCode: null,
+    });
+
+    showAuthStep("code");
+    setAuthStatus(`Пока SMS/email не подключены, код: ${response.debugCode}`, "code");
+  } catch (error) {
+    console.error(error);
+    setAuthStatus("Не получилось отправить код. Проверь сервер.", "start");
+  }
 }
 
-function handleJoinSubmit(form) {
+async function handleJoinSubmit(form) {
   const formData = new FormData(form);
   const contact = String(formData.get("contact") ?? "").trim();
   const partnerCode = String(formData.get("inviteCode") ?? "").trim().toUpperCase();
+  const method = getAuthState().method || "phone";
 
   if (!partnerCode || !contact) {
     setAuthStatus("Нужен код партнёра и контакт для входа.", "join");
     return;
   }
 
-  saveAuthState({
-    mode: "join",
-    contact,
-    partnerCode,
-    codeSent: true,
-  });
+  setAuthStatus("Проверяю приглашение...", "join");
 
-  setAuthStatus("");
-  showAuthStep("code");
+  try {
+    const response = await requestAuthCode({ method, contact, inviteCode: partnerCode });
+
+    saveAuthState({
+      mode: "join",
+      method: response.contactType?.toLowerCase() || method,
+      contact: response.contact || contact,
+      partnerCode,
+      codeSent: true,
+      debugCode: response.debugCode,
+      authCodeId: null,
+      hasExistingSpace: false,
+    });
+
+    showAuthStep("code");
+    setAuthStatus(`Пока SMS/email не подключены, код: ${response.debugCode}`, "code");
+  } catch (error) {
+    console.error(error);
+    setAuthStatus("Код партнёра не найден или сервер недоступен.", "join");
+  }
 }
 
-function handleCodeSubmit(form) {
+async function handleCodeSubmit(form) {
   const formData = new FormData(form);
   const code = String(formData.get("code") ?? "").trim();
+  const authState = getAuthState();
 
   if (code.length < 4) {
     setAuthStatus("Код должен быть не короче 4 цифр.", "code");
     return;
   }
 
-  saveAuthState({ verified: true });
-  setAuthStatus("");
-  showAuthStep("profile");
+  setAuthStatus("Проверяю код...", "code");
+
+  try {
+    const response = await verifyAuthCode({
+      method: authState.method,
+      contact: authState.contact,
+      code,
+    });
+
+    if (response.existingUser) {
+      const existingSpace = response.existingUser.memberships?.[0]?.space;
+      const existingPersonalData = readJson(personalStorageKey, {});
+      const profileSettings =
+        response.existingUser.profileSettings && typeof response.existingUser.profileSettings === "object"
+          ? response.existingUser.profileSettings
+          : {};
+      writeJson(personalStorageKey, {
+        ...existingPersonalData,
+        name: response.existingUser.name || existingPersonalData.name,
+        avatar: response.existingUser.avatarInitials || existingPersonalData.avatar,
+        avatarPhoto: response.existingUser.avatarPhoto || existingPersonalData.avatarPhoto || "",
+        partner: response.existingUser.partnerName || existingPersonalData.partner,
+        birthday: profileSettings.birthday || existingPersonalData.birthday || "",
+        role: profileSettings.role || existingPersonalData.role || "Мой профиль",
+      });
+
+      if (existingSpace) {
+        const notificationSettings =
+          existingSpace.notificationSettings && typeof existingSpace.notificationSettings === "object"
+            ? existingSpace.notificationSettings
+            : {};
+
+        writeJson(notificationsStorageKey, {
+          ...getNotificationSettings(),
+          ...notificationSettings,
+          ...(existingSpace.dailySummaryTime ? { summaryTime: existingSpace.dailySummaryTime } : {}),
+        });
+
+        saveAuthState({
+          hasExistingSpace: true,
+          inviteCode: existingSpace.inviteCode,
+          spaceName: existingSpace.name,
+          startDate: isoDateOnly(existingSpace.relationshipStartDate),
+          themePreference: existingSpace.themePreference || getSavedTheme(),
+          summaryTime: existingSpace.dailySummaryTime || getNotificationSettings().summaryTime || "09:00",
+        });
+      }
+    }
+
+    saveAuthState({
+      verified: true,
+      authCodeId: response.authCodeId,
+    });
+
+    setAuthStatus("");
+    showAuthStep("profile");
+  } catch (error) {
+    console.error(error);
+    setAuthStatus("Код не подошёл или устарел.", "code");
+  }
 }
 
 function handleProfileSubmit(form) {
@@ -426,7 +636,7 @@ function handleProfileSubmit(form) {
   showAuthStep("setup");
 }
 
-function handleSetupSubmit(form) {
+async function handleSetupSubmit(form) {
   const formData = new FormData(form);
   const spaceName = String(formData.get("spaceName") ?? "").trim() || "LOZHKA";
   const startDate = String(formData.get("startDate") ?? "").trim();
@@ -439,6 +649,7 @@ function handleSetupSubmit(form) {
     summaryTime,
     inviteCode: getAuthState().inviteCode || createInviteCode(),
   });
+  const personalData = readJson(personalStorageKey, {});
 
   writeJson(notificationsStorageKey, {
     ...getNotificationSettings(),
@@ -447,29 +658,98 @@ function handleSetupSubmit(form) {
   applyTheme(themePreference);
   applyNotificationSettings();
 
-  if (state.mode === "join") {
-    completeAuth("join");
+  if (!state.authCodeId || !state.contact) {
+    setAuthStatus("Сначала нужно подтвердить код.", "setup");
     return;
   }
 
-  showAuthStep("invite");
+  setAuthStatus("Сохраняю профиль...", "setup");
+
+  try {
+    const session = await completeAuthRequest({
+      authCodeId: state.authCodeId,
+      method: state.method,
+      contact: state.contact,
+      name: personalData.name || state.name || "Александр",
+      partnerName: personalData.partner || state.partner || "Саша",
+      avatarInitials: personalData.avatar || getInitials(personalData.name || state.name),
+      avatarPhoto: personalData.avatarPhoto || "",
+      profileSettings: {
+        birthday: personalData.birthday || "",
+        role: personalData.role || "Мой профиль",
+      },
+      spaceName,
+      relationshipStartDate: startDate || null,
+      themePreference,
+      dailySummaryTime: summaryTime,
+      notificationSettings: {
+        ...getNotificationSettings(),
+        summaryTime,
+      },
+      inviteCode: state.mode === "join" ? state.partnerCode : null,
+    });
+
+    syncSessionData(session);
+
+    if (state.mode === "join" || state.hasExistingSpace) {
+      completeAuth(state.mode === "join" ? "join" : "login");
+      return;
+    }
+
+    showAuthStep("invite");
+  } catch (error) {
+    console.error(error);
+    setAuthStatus("Не получилось сохранить регистрацию. Проверь сервер.", "setup");
+  }
 }
 
-function handleAuthFormSubmit(form) {
+async function resendAuthCode() {
+  const state = getAuthState();
+
+  if (!state.contact) {
+    setAuthStatus("Сначала укажи контакт.", "code");
+    showAuthStep("start");
+    return;
+  }
+
+  setAuthStatus("Отправляю новый код...", "code");
+
+  try {
+    const response = await requestAuthCode({
+      method: state.method,
+      contact: state.contact,
+      inviteCode: state.mode === "join" ? state.partnerCode : null,
+    });
+
+    saveAuthState({
+      debugCode: response.debugCode,
+      authCodeId: null,
+      verified: false,
+      codeSent: true,
+    });
+
+    setAuthStatus(`Новый код: ${response.debugCode}`, "code");
+  } catch (error) {
+    console.error(error);
+    setAuthStatus("Не получилось отправить новый код.", "code");
+  }
+}
+
+async function handleAuthFormSubmit(form) {
   const formName = form.dataset.authForm;
 
   if (formName === "contact") {
-    handleContactSubmit(form);
+    await handleContactSubmit(form);
     return;
   }
 
   if (formName === "join") {
-    handleJoinSubmit(form);
+    await handleJoinSubmit(form);
     return;
   }
 
   if (formName === "code") {
-    handleCodeSubmit(form);
+    await handleCodeSubmit(form);
     return;
   }
 
@@ -479,7 +759,7 @@ function handleAuthFormSubmit(form) {
   }
 
   if (formName === "setup") {
-    handleSetupSubmit(form);
+    await handleSetupSubmit(form);
   }
 }
 
@@ -504,9 +784,20 @@ function applyPersonalData() {
   document.querySelectorAll(".profile-main > div > span").forEach((item) => {
     item.textContent = `Партнёр: ${partner}`;
   });
+
+  document.querySelectorAll('select[name="assignee"]').forEach((select) => {
+    const currentValue = select.value;
+    const options = [name, partner, "Оба"];
+
+    select.replaceChildren(...options.map((option) => new Option(option, option)));
+
+    if (options.includes(currentValue)) {
+      select.value = currentValue;
+    }
+  });
 }
 
-function savePersonalData() {
+async function savePersonalData() {
   const data = readJson(personalStorageKey, {});
 
   document.querySelectorAll("[data-personal-field]").forEach((field) => {
@@ -519,9 +810,60 @@ function savePersonalData() {
   updateAuthUi();
 
   const status = document.getElementById("personalDataStatus");
-  if (status) {
-    status.textContent = "Сохранено на этом устройстве.";
+
+  if (!getSession()?.token) {
+    if (status) {
+      status.textContent = "Сохранено на этом устройстве.";
+    }
+
+    return;
   }
+
+  if (status) {
+    status.textContent = "Сохраняю на сервере...";
+  }
+
+  try {
+    await persistSessionPatch({
+      user: {
+        name: data.name || "Александр",
+        partnerName: data.partner || null,
+        avatarInitials: data.avatar,
+        avatarPhoto: data.avatarPhoto || "",
+        email: data.email || null,
+        phone: data.phone || null,
+        profileSettings: {
+          birthday: data.birthday || "",
+          role: data.role || "Мой профиль",
+        },
+      },
+    });
+
+    if (status) {
+      status.textContent = "Сохранено на сервере.";
+    }
+  } catch (error) {
+    console.error(error);
+
+    if (status) {
+      status.textContent = "Сохранено на устройстве, сервер не ответил.";
+    }
+  }
+}
+
+async function persistAvatarData(data) {
+  if (!getSession()?.token) {
+    return false;
+  }
+
+  await persistSessionPatch({
+    user: {
+      avatarInitials: data.avatar,
+      avatarPhoto: data.avatarPhoto || "",
+    },
+  });
+
+  return true;
 }
 
 async function saveAvatarPhoto(input) {
@@ -544,13 +886,32 @@ async function saveAvatarPhoto(input) {
     applyPersonalData();
     updateAuthUi();
 
-    const saveMessage = didSave ? "Фото сохранено на этом устройстве." : "Не удалось сохранить фото на этом устройстве.";
-
     if (status) {
-      status.textContent = saveMessage;
+      status.textContent = didSave ? "Сохраняю фото..." : "Не удалось сохранить фото на этом устройстве.";
     }
 
-    setAuthStatus(didSave ? "Фото добавлено." : "Не удалось сохранить фото.", "profile");
+    if (didSave) {
+      try {
+        const savedOnServer = await persistAvatarData(nextPersonalData);
+        const saveMessage = savedOnServer ? "Фото сохранено на сервере." : "Фото сохранено на этом устройстве.";
+
+        if (status) {
+          status.textContent = saveMessage;
+        }
+
+        setAuthStatus("Фото добавлено.", "profile");
+      } catch (error) {
+        console.error(error);
+
+        if (status) {
+          status.textContent = "Фото сохранено на устройстве, сервер не ответил.";
+        }
+
+        setAuthStatus("Фото добавлено на этом устройстве.", "profile");
+      }
+    } else {
+      setAuthStatus("Не удалось сохранить фото.", "profile");
+    }
   } catch (error) {
     console.error(error);
 
@@ -564,7 +925,7 @@ async function saveAvatarPhoto(input) {
   }
 }
 
-function removeAvatarPhoto() {
+async function removeAvatarPhoto() {
   const personalData = readJson(personalStorageKey, {});
   const nextPersonalData = {
     ...personalData,
@@ -578,8 +939,31 @@ function removeAvatarPhoto() {
   updateAuthUi();
 
   const status = document.getElementById("personalDataStatus");
+
+  if (!getSession()?.token) {
+    if (status) {
+      status.textContent = "Фото удалено. Показываются инициалы из имени.";
+    }
+
+    return;
+  }
+
   if (status) {
-    status.textContent = "Фото удалено. Показываются инициалы из имени.";
+    status.textContent = "Удаляю фото на сервере...";
+  }
+
+  try {
+    await persistAvatarData(nextPersonalData);
+
+    if (status) {
+      status.textContent = "Фото удалено на сервере.";
+    }
+  } catch (error) {
+    console.error(error);
+
+    if (status) {
+      status.textContent = "Фото удалено на устройстве, сервер не ответил.";
+    }
   }
 }
 
@@ -607,7 +991,7 @@ function applyNotificationSettings() {
   }
 }
 
-function saveNotificationSettings() {
+async function saveNotificationSettings() {
   const settings = getNotificationSettings();
 
   document.querySelectorAll("[data-notification-key]").forEach((field) => {
@@ -625,6 +1009,21 @@ function saveNotificationSettings() {
   }
 
   writeJson(notificationsStorageKey, settings);
+
+  if (!getSession()?.token) {
+    return;
+  }
+
+  try {
+    await persistSessionPatch({
+      space: {
+        dailySummaryTime: settings.summaryTime || null,
+        notificationSettings: settings,
+      },
+    });
+  } catch (error) {
+    console.warn("Notification settings were saved locally only.", error);
+  }
 }
 
 function updateDots() {
@@ -773,16 +1172,30 @@ async function loadTasks() {
 }
 
 function getTaskAssigneePayload(assignee) {
-  if (assignee === "Александр") {
+  if (assignee === "Оба") {
+    return { assigneeType: "SHARED" };
+  }
+
+  const session = getSession();
+  const spaceMember = session?.spaceMembers?.find((member) => member.user?.name === assignee);
+
+  if (spaceMember) {
+    return { assigneeType: "USER", assigneeUserId: spaceMember.userId };
+  }
+
+  const personalData = readJson(personalStorageKey, {});
+  const currentUserName = personalData.name || session?.user?.name || "Александр";
+
+  if (session?.user?.id && assignee === currentUserName) {
+    return { assigneeType: "USER", assigneeUserId: session.user.id };
+  }
+
+  if (!session?.token && assignee === "Александр") {
     return { assigneeType: "USER", assigneeUserId: "demo-alex" };
   }
 
-  if (assignee === "Настя") {
+  if (!session?.token && assignee === "Настя") {
     return { assigneeType: "USER", assigneeUserId: "demo-nastya" };
-  }
-
-  if (assignee === "Оба") {
-    return { assigneeType: "SHARED" };
   }
 
   return { assigneeType: "UNASSIGNED" };
@@ -896,13 +1309,13 @@ document.addEventListener("click", (event) => {
   }
 });
 
-document.addEventListener("submit", (event) => {
+document.addEventListener("submit", async (event) => {
   const authForm = event.target.closest?.("[data-auth-form]");
 
   if (!authForm) return;
 
   event.preventDefault();
-  handleAuthFormSubmit(authForm);
+  await handleAuthFormSubmit(authForm);
 });
 
 document.addEventListener("click", async (event) => {
@@ -927,8 +1340,7 @@ document.addEventListener("click", async (event) => {
   }
 
   if (authResendButton) {
-    saveAuthState({ codeSent: true });
-    setAuthStatus("Код отправлен ещё раз.", "code");
+    await resendAuthCode();
   }
 
   if (authCopyButton) {
@@ -1013,7 +1425,7 @@ document.addEventListener("change", async (event) => {
   }
 
   if (event.target.closest?.("[data-notification-key], [data-quiet-hours], [data-summary-time]")) {
-    saveNotificationSettings();
+    void saveNotificationSettings();
   }
 
   const checkbox = event.target.closest?.("[data-task-complete]");
@@ -1035,15 +1447,15 @@ document.addEventListener("change", async (event) => {
   }
 });
 
-document.addEventListener("click", (event) => {
+document.addEventListener("click", async (event) => {
   const savePersonalButton = event.target.closest?.("[data-save-personal-data]");
   if (savePersonalButton) {
-    savePersonalData();
+    await savePersonalData();
   }
 
   const removeAvatarButton = event.target.closest?.("[data-avatar-photo-remove]");
   if (removeAvatarButton) {
-    removeAvatarPhoto();
+    await removeAvatarPhoto();
   }
 });
 
@@ -1079,7 +1491,7 @@ shoppingTabButtons.forEach((button) => {
   });
 });
 
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
   applyTheme(getSavedTheme());
   applyPersonalData();
   applyNotificationSettings();
@@ -1088,7 +1500,9 @@ window.addEventListener("load", () => {
   updateDots();
   showCalendarView("week");
   showShoppingTab("today");
-  showPage(getAuthState().completed ? "today" : "auth");
+  const hasBackendSession = await hydrateSession();
+  const authState = getAuthState();
+  showPage(hasBackendSession || (authState.completed && authState.mode === "demo") ? "today" : "auth");
   loadTasks().catch((error) => {
     console.warn("Tasks API is unavailable, mock tasks stay visible.", error);
   });
