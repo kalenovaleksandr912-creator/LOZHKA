@@ -1,5 +1,5 @@
-import { moreGroups } from "../data/mock-data.js?v=20";
-import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=20";
+import { moreGroups } from "../data/mock-data.js?v=21";
+import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=21";
 
 function renderMoreRow(item) {
   const targetPage = item.targetPage ? ` data-target-page="${escapeHtml(item.targetPage)}"` : "";

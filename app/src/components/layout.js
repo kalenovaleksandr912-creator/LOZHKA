@@ -1,4 +1,4 @@
-import { icon } from "./html.js?v=20";
+import { icon } from "./html.js?v=21";
 
 export function renderBottomNav() {
   const items = [
@@ -122,6 +122,15 @@ export function renderQuickSheet() {
             <input name="amount" type="text" placeholder="1 шт" />
           </label>
           <label class="field">
+            <span>Раздел</span>
+            <select name="category">
+              <option value="products" selected>Продукты</option>
+              <option value="other">Остальное</option>
+            </select>
+          </label>
+        </div>
+        <div class="field-grid">
+          <label class="field">
             <span>Приоритет</span>
             <select name="priority">
               <option>Срочно</option>
@@ -142,6 +151,29 @@ export function renderQuickSheet() {
         <p class="form-status" aria-live="polite"></p>
       </form>
 
+    </section>
+  `;
+}
+
+export function renderDetailSheet() {
+  return `
+    <div class="detail-backdrop" id="detailBackdrop" data-detail-close hidden></div>
+    <section class="detail-sheet" id="detailSheet" aria-labelledby="detailSheetTitle" hidden>
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="sheet-title">
+        <span class="detail-icon neutral" id="detailSheetIcon">${icon("sparkles")}</span>
+        <h2 id="detailSheetTitle">Детали</h2>
+        <button class="icon-button" type="button" data-detail-close aria-label="Закрыть">
+          ${icon("x")}
+        </button>
+      </div>
+
+      <div class="detail-content">
+        <p class="detail-subtitle" id="detailSheetSubtitle"></p>
+        <p class="detail-body" id="detailSheetBody"></p>
+        <div class="detail-meta" id="detailSheetMeta"></div>
+        <div class="detail-actions" id="detailSheetActions"></div>
+      </div>
     </section>
   `;
 }

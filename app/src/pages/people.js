@@ -1,9 +1,16 @@
-import { people } from "../data/mock-data.js?v=20";
-import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=20";
+import { people } from "../data/mock-data.js?v=21";
+import { detailAttrs, escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=21";
 
 function renderPersonCard(person) {
   return `
-    <article class="person-card tone-${escapeHtml(person.tone)}">
+    <button class="person-card tone-${escapeHtml(person.tone)}" type="button"${detailAttrs({
+      kind: "person",
+      title: person.name,
+      subtitle: `${person.role} · ${person.birthday}`,
+      body: `${person.nextEvent}. ${person.note}`,
+      icon: "user-round",
+      tone: person.tone,
+    })} data-detail-meta="${escapeHtml(person.tags.join("|"))}">
       <header>
         <span class="person-avatar">${escapeHtml(person.initials)}</span>
         <div>
@@ -25,7 +32,7 @@ function renderPersonCard(person) {
       <div class="person-tags">
         ${person.tags.map((tag) => `<em>${escapeHtml(tag)}</em>`).join("")}
       </div>
-    </article>
+    </button>
   `;
 }
 

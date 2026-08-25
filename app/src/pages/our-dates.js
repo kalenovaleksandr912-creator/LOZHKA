@@ -1,4 +1,4 @@
-import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=20";
+import { detailAttrs, escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=21";
 
 const dateStats = [
   { value: "657", label: "дней вместе" },
@@ -31,14 +31,22 @@ const dates = [
 
 function renderDateCard(item) {
   return `
-    <article class="date-card">
+    <button class="date-card" type="button"${detailAttrs({
+      kind: "date",
+      title: item.title,
+      subtitle: item.date,
+      body: item.details,
+      icon: item.icon,
+      tone: item.tone,
+      targetPage: "calendar",
+    })}>
       <span class="row-icon ${escapeHtml(item.tone)}">${icon(item.icon)}</span>
       <div>
         <strong>${escapeHtml(item.title)}</strong>
         <time>${escapeHtml(item.date)}</time>
         <small>${escapeHtml(item.details)}</small>
       </div>
-    </article>
+    </button>
   `;
 }
 

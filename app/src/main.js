@@ -1,16 +1,18 @@
-import { renderBottomNav, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=20";
-import { renderAuthPage } from "./pages/auth.js?v=20";
-import { renderCalendarPage } from "./pages/calendar.js?v=20";
-import { renderMenuPage } from "./pages/menu.js?v=20";
-import { renderMorePage } from "./pages/more.js?v=20";
-import { renderNotificationsPage } from "./pages/notifications.js?v=20";
-import { renderOurDatesPage } from "./pages/our-dates.js?v=20";
-import { renderPeoplePage } from "./pages/people.js?v=20";
-import { renderPersonalDataPage } from "./pages/personal-data.js?v=20";
-import { renderShoppingPage } from "./pages/shopping.js?v=20";
-import { renderStatsPage } from "./pages/stats.js?v=20";
-import { renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=20";
-import { renderTodayPage, renderTodayTasksContent } from "./pages/today.js?v=20";
+import { renderBottomNav, renderDetailSheet, renderProfileCard, renderQuickSheet } from "./components/layout.js?v=21";
+import { agendaCard, icon } from "./components/html.js?v=21";
+import { renderAuthPage } from "./pages/auth.js?v=21";
+import { renderCalendarPage } from "./pages/calendar.js?v=21";
+import { renderMenuPage } from "./pages/menu.js?v=21";
+import { renderMorePage } from "./pages/more.js?v=21";
+import { renderNotificationsPage } from "./pages/notifications.js?v=21";
+import { renderOurDatesPage } from "./pages/our-dates.js?v=21";
+import { renderPeoplePage } from "./pages/people.js?v=21";
+import { renderPersonalDataPage } from "./pages/personal-data.js?v=21";
+import { renderShoppingPage, renderShoppingViews } from "./pages/shopping.js?v=21";
+import { renderStatsPage } from "./pages/stats.js?v=21";
+import { getTaskBoardTitle, getVisibleTasks, renderTaskViews, renderTasksPage } from "./pages/tasks.js?v=21";
+import { renderTodayEventsContent, renderTodayPage, renderTodayShoppingContent, renderTodayTasksContent } from "./pages/today.js?v=21";
+import { shopping as defaultTodayShopping, shoppingLists, tasks as defaultTaskData, todayEvents as defaultTodayEvents } from "./data/mock-data.js?v=21";
 import {
   clearSession,
   completeAuth as completeAuthRequest,
@@ -23,8 +25,8 @@ import {
   updateCurrentSession,
   updateTaskCompletion,
   verifyAuthCode,
-} from "./lib/api.js?v=20";
-import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=20";
+} from "./lib/api.js?v=21";
+import { DEFAULT_TASK_DATE, toViewTasks } from "./lib/task-view.js?v=21";
 
 const app = document.getElementById("app");
 
@@ -43,6 +45,7 @@ app.innerHTML = `
   ${renderNotificationsPage()}
   ${renderBottomNav()}
   ${renderQuickSheet()}
+  ${renderDetailSheet()}
   ${renderProfileCard()}
 `;
 
@@ -64,7 +67,6 @@ const calendarViewButtons = Array.from(document.querySelectorAll(".segment-contr
 const calendarViews = Array.from(document.querySelectorAll(".calendar-view"));
 const calendarModeLabel = document.getElementById("calendarModeLabel");
 const shoppingTabButtons = Array.from(document.querySelectorAll("[data-shopping-tab]"));
-const shoppingGroups = Array.from(document.querySelectorAll("[data-shopping-group]"));
 const dailyPhotoOverlay = document.getElementById("dailyPhotoOverlay");
 const dailyPhotoInput = document.getElementById("dailyPhotoInput");
 const openCameraButton = document.querySelector("[data-open-camera]");
@@ -74,15 +76,30 @@ const profileBackdrop = document.getElementById("profileBackdrop");
 const profileOpenButtons = Array.from(document.querySelectorAll("[data-profile-open]"));
 const profileCloseButtons = Array.from(document.querySelectorAll("[data-profile-close]"));
 const themeButtons = Array.from(document.querySelectorAll("[data-theme-choice]"));
+const detailSheet = document.getElementById("detailSheet");
+const detailBackdrop = document.getElementById("detailBackdrop");
+const detailTitle = document.getElementById("detailSheetTitle");
+const detailIcon = document.getElementById("detailSheetIcon");
+const detailSubtitle = document.getElementById("detailSheetSubtitle");
+const detailBody = document.getElementById("detailSheetBody");
+const detailMeta = document.getElementById("detailSheetMeta");
+const detailActions = document.getElementById("detailSheetActions");
 let lastSheetTrigger = document.getElementById("openQuickAdd");
 let lastProfileTrigger = null;
-let taskState = [];
+let lastDetailTrigger = null;
+let taskState = toViewTasks(defaultTaskData);
+let taskFilters = { owner: "all", date: "today" };
+let currentShoppingTab = "today";
+let localEvents = [];
+let localShoppingItems = [];
 const secondaryPages = new Set(["menu", "shopping", "stats", "people", "personal-data", "our-dates", "notifications"]);
 const authPages = new Set(["auth"]);
 const themeStorageKey = "lozhka-theme";
 const authStorageKey = "lozhka-auth-state";
 const personalStorageKey = "lozhka-personal-data";
 const notificationsStorageKey = "lozhka-notifications";
+const localEventsStorageKey = "lozhka-local-events";
+const localShoppingStorageKey = "lozhka-local-shopping";
 const availableThemes = new Set(["dark", "rose"]);
 const authStepOrder = ["start", "code", "profile", "setup", "invite"];
 
@@ -151,6 +168,60 @@ function writeJson(key, value) {
     // Local preferences remain interactive even if storage is unavailable.
     return false;
   }
+}
+
+function makeLocalId(prefix) {
+  return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+}
+
+function getShoppingGroupKey(date) {
+  if (!date) return "no-date";
+  if (date === DEFAULT_TASK_DATE) return "today";
+  return "upcoming";
+}
+
+function getCurrentShoppingLists() {
+  return shoppingLists.map((group) => {
+    const extraItems = localShoppingItems.filter((item) => item.groupKey === group.key);
+    const items = [...group.items, ...extraItems];
+
+    return {
+      ...group,
+      subtitle: `${items.length} позиций`,
+      items,
+    };
+  });
+}
+
+function getTodayShoppingItems() {
+  const extraItems = localShoppingItems
+    .filter((item) => item.groupKey === "today")
+    .map((item) => ({
+      title: item.title,
+      completed: item.completed,
+    }));
+
+  return [...defaultTodayShopping, ...extraItems];
+}
+
+function getTodayEvents() {
+  const extraEvents = localEvents
+    .filter((event) => event.date === DEFAULT_TASK_DATE)
+    .map((event) => ({
+      time: event.time || "Весь день",
+      title: event.title,
+      details: event.note || "Добавлено в прототипе",
+    }));
+
+  return [...defaultTodayEvents, ...extraEvents];
+}
+
+function saveLocalEvents() {
+  writeJson(localEventsStorageKey, localEvents);
+}
+
+function saveLocalShoppingItems() {
+  writeJson(localShoppingStorageKey, localShoppingItems);
 }
 
 function getInitials(name) {
@@ -1036,13 +1107,13 @@ function updateDots() {
   });
 }
 
-function setSheetOpen(isOpen) {
+function setSheetOpen(isOpen, initialView = "menu") {
   quickSheet.hidden = !isOpen;
   sheetBackdrop.hidden = !isOpen;
   document.body.style.overflow = isOpen ? "hidden" : "";
 
   if (isOpen) {
-    showQuickSheetView("menu");
+    showQuickSheetView(initialView);
     closeQuickAdd.focus();
   } else if (lastSheetTrigger) {
     lastSheetTrigger.focus();
@@ -1074,6 +1145,159 @@ function setProfileOpen(isOpen) {
   } else if (lastProfileTrigger && !lastProfileTrigger.closest("[hidden]")) {
     lastProfileTrigger.focus();
   }
+}
+
+const detailIconByKind = {
+  date: "heart",
+  dish: "utensils",
+  event: "calendar",
+  menu: "utensils",
+  person: "user-round",
+  shopping: "shopping-bag",
+  stat: "bar-chart-3",
+  task: "check-square",
+};
+
+function setDetailOpen(isOpen) {
+  if (!detailSheet || !detailBackdrop) return;
+
+  detailSheet.hidden = !isOpen;
+  detailBackdrop.hidden = !isOpen;
+  document.body.style.overflow = isOpen ? "hidden" : "";
+
+  if (isOpen) {
+    detailSheet.querySelector("[data-detail-close]")?.focus();
+  } else if (lastDetailTrigger && !lastDetailTrigger.closest("[hidden]")) {
+    lastDetailTrigger.focus();
+  }
+}
+
+function getDetailActions(data) {
+  if (data.kind === "dish") {
+    return [
+      { label: "Сегодня", primary: true, note: `${data.title} добавлено в план на сегодня.` },
+      { label: "Завтра", note: `${data.title} добавлено в план на завтра.` },
+      { label: "Календарь", targetPage: "calendar", calendarView: "day" },
+    ];
+  }
+
+  if (data.kind === "shopping") {
+    return [
+      { label: "Открыть покупки", primary: true, targetPage: "shopping" },
+      { label: "Отметить купленным", action: "completeShopping", note: "Позиция отмечена как купленная в текущем просмотре." },
+    ];
+  }
+
+  if (data.kind === "person") {
+    return [
+      { label: "Добавить событие", primary: true, quickView: "event" },
+      { label: "Календарь", targetPage: "calendar" },
+    ];
+  }
+
+  if (data.kind === "date" || data.kind === "event") {
+    return [
+      { label: "Календарь", primary: true, targetPage: "calendar" },
+      { label: "Добавить ещё", quickView: "event" },
+    ];
+  }
+
+  if (data.kind === "task") {
+    return [
+      { label: "Открыть задачи", primary: true, targetPage: "tasks" },
+      { label: "Новая задача", quickView: "task" },
+    ];
+  }
+
+  if (data.kind === "stat") {
+    return [
+      { label: "Статистика", primary: true, targetPage: "stats" },
+      { label: "Закрыть", close: true },
+    ];
+  }
+
+  return [{ label: "Закрыть", primary: true, close: true }];
+}
+
+function renderDetailActions(actions) {
+  detailActions.replaceChildren();
+
+  actions.forEach((action) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = action.label;
+
+    if (action.primary) {
+      button.classList.add("is-primary");
+    }
+
+    if (action.targetPage) {
+      button.dataset.targetPage = action.targetPage;
+    }
+
+    if (action.calendarView) {
+      button.dataset.calendarShortcut = action.calendarView;
+    }
+
+    if (action.quickView) {
+      button.dataset.detailQuickView = action.quickView;
+    }
+
+    if (action.note) {
+      button.dataset.detailNote = action.note;
+    }
+
+    if (action.action) {
+      button.dataset.detailAction = action.action;
+    }
+
+    if (action.close) {
+      button.dataset.detailClose = "";
+    }
+
+    detailActions.append(button);
+  });
+}
+
+function showDetail(data, trigger = null) {
+  if (!detailSheet) return;
+
+  lastDetailTrigger = trigger;
+
+  const kind = data.kind || "default";
+  const iconName = data.icon || detailIconByKind[kind] || "sparkles";
+  const tone = data.tone || kind;
+  const meta = data.meta ? data.meta.split("|").filter(Boolean) : [];
+
+  detailIcon.className = `detail-icon ${tone}`;
+  detailIcon.innerHTML = icon(iconName);
+  detailTitle.textContent = data.title || "Детали";
+  detailSubtitle.textContent = data.subtitle || "";
+  detailBody.textContent = data.body || "";
+  detailMeta.replaceChildren(...meta.map((item) => {
+    const chip = document.createElement("span");
+    chip.textContent = item;
+    return chip;
+  }));
+  renderDetailActions(getDetailActions({ ...data, kind }));
+  refreshIcons();
+  setDetailOpen(true);
+}
+
+function showDetailFromElement(element) {
+  showDetail(
+    {
+      kind: element.dataset.detailKind,
+      title: element.dataset.detailTitle,
+      subtitle: element.dataset.detailSubtitle,
+      body: element.dataset.detailBody,
+      icon: element.dataset.detailIcon,
+      tone: element.dataset.detailTone,
+      meta: element.dataset.detailMeta,
+      targetPage: element.dataset.detailTargetPage,
+    },
+    element,
+  );
 }
 
 function showQuickSheetView(viewName) {
@@ -1143,25 +1367,68 @@ function showCalendarView(viewName) {
 }
 
 function showShoppingTab(tabName) {
-  shoppingGroups.forEach((group) => {
+  currentShoppingTab = tabName;
+
+  Array.from(document.querySelectorAll("[data-shopping-group]")).forEach((group) => {
     const isActive = group.dataset.shoppingGroup === tabName;
     group.hidden = !isActive;
     group.classList.toggle("is-active", isActive);
   });
 
-  shoppingTabButtons.forEach((button) => {
+  Array.from(document.querySelectorAll("[data-shopping-tab]")).forEach((button) => {
     button.classList.toggle("is-active", button.dataset.shoppingTab === tabName);
   });
 }
 
 function renderDynamicTaskViews() {
   const todayTasksSection = document.getElementById("todayTasksSection");
+  const visibleTasks = getVisibleTasks(taskState, taskFilters);
 
   if (todayTasksSection) {
     todayTasksSection.innerHTML = renderTodayTasksContent(taskState);
   }
 
-  renderTaskViews(taskState);
+  renderTaskViews(taskState, visibleTasks, getTaskBoardTitle(taskFilters));
+  refreshIcons();
+}
+
+function renderCalendarLocalEvents() {
+  const root = document.getElementById("calendarLocalEvents");
+  if (!root) return;
+
+  root.hidden = localEvents.length === 0;
+  root.innerHTML = localEvents.length
+    ? `
+      <h4>Добавлено в прототипе</h4>
+      ${localEvents
+        .map((event) =>
+          agendaCard({
+            kind: "event",
+            time: event.time || "Весь день",
+            title: event.title,
+            details: `${event.date || "Без даты"} · ${event.note || "Локально сохранено"}`,
+          }),
+        )
+        .join("")}
+    `
+    : "";
+}
+
+function renderLocalViews() {
+  const todayEventsSection = document.getElementById("todayEventsSection");
+  const todayShoppingSection = document.getElementById("todayShoppingSection");
+
+  if (todayEventsSection) {
+    todayEventsSection.innerHTML = renderTodayEventsContent(getTodayEvents());
+  }
+
+  if (todayShoppingSection) {
+    todayShoppingSection.innerHTML = renderTodayShoppingContent(getTodayShoppingItems());
+  }
+
+  renderShoppingViews(getCurrentShoppingLists());
+  renderCalendarLocalEvents();
+  showShoppingTab(currentShoppingTab);
   refreshIcons();
 }
 
@@ -1254,6 +1521,82 @@ async function handleTaskSubmit(form) {
   }
 }
 
+function handleEventSubmit(form) {
+  const status = form.querySelector(".form-status");
+  const formData = new FormData(form);
+  const title = String(formData.get("title") ?? "").trim();
+  const date = String(formData.get("date") ?? "").trim();
+  const time = String(formData.get("time") ?? "").trim();
+
+  if (!title) return;
+
+  const event = {
+    id: makeLocalId("event"),
+    title,
+    date,
+    time,
+    note: "Добавлено через быстрый ввод",
+  };
+
+  localEvents = [...localEvents, event];
+  saveLocalEvents();
+  renderLocalViews();
+  form.reset();
+
+  const dateField = form.querySelector('input[name="date"]');
+  const timeField = form.querySelector('input[name="time"]');
+  if (dateField) dateField.value = DEFAULT_TASK_DATE;
+  if (timeField) timeField.value = "09:00";
+
+  if (status) {
+    status.textContent = "Готово. Событие сохранено на этом устройстве.";
+  }
+
+  window.setTimeout(() => setSheetOpen(false), 450);
+}
+
+function handlePurchaseSubmit(form) {
+  const status = form.querySelector(".form-status");
+  const formData = new FormData(form);
+  const title = String(formData.get("title") ?? "").trim();
+  const amount = String(formData.get("amount") ?? "").trim();
+  const category = String(formData.get("category") ?? "products");
+  const priority = String(formData.get("priority") ?? "Надо сделать");
+  const date = String(formData.get("date") ?? "").trim();
+  const note = String(formData.get("note") ?? "").trim();
+
+  if (!title) return;
+
+  const item = {
+    id: makeLocalId("purchase"),
+    title,
+    details: [amount, note].filter(Boolean).join(" · ") || "Добавлено вручную",
+    category: category === "other" ? "other" : "products",
+    priority,
+    owner: "Общее",
+    completed: false,
+    groupKey: getShoppingGroupKey(date),
+  };
+
+  localShoppingItems = [...localShoppingItems, item];
+  saveLocalShoppingItems();
+  renderLocalViews();
+  form.reset();
+
+  const dateField = form.querySelector('input[name="date"]');
+  const categoryField = form.querySelector('select[name="category"]');
+  const priorityField = form.querySelector('select[name="priority"]');
+  if (dateField) dateField.value = DEFAULT_TASK_DATE;
+  if (categoryField) categoryField.value = "products";
+  if (priorityField) priorityField.value = "Надо сделать";
+
+  if (status) {
+    status.textContent = "Готово. Покупка добавлена в список.";
+  }
+
+  window.setTimeout(() => setSheetOpen(false), 450);
+}
+
 carouselTrack?.addEventListener("scroll", () => {
   window.requestAnimationFrame(updateDots);
 });
@@ -1261,7 +1604,7 @@ carouselTrack?.addEventListener("scroll", () => {
 addButtons.forEach((button) => {
   button.addEventListener("click", () => {
     lastSheetTrigger = button;
-    setSheetOpen(true);
+    setSheetOpen(true, button.dataset.addView || "menu");
   });
 });
 
@@ -1281,11 +1624,20 @@ themeButtons.forEach((button) => {
 });
 closeQuickAdd?.addEventListener("click", () => setSheetOpen(false));
 sheetBackdrop?.addEventListener("click", () => setSheetOpen(false));
+detailBackdrop?.addEventListener("click", () => setDetailOpen(false));
 backQuickAdd?.addEventListener("click", () => showQuickSheetView("menu"));
 document.addEventListener("click", (event) => {
   const dailyPhotoCard = event.target.closest?.('[data-card-action="daily-photo"]');
   const tomorrowCard = event.target.closest?.('[data-card-action="tomorrow"]');
+  const birthdaysCard = event.target.closest?.('[data-card-action="birthdays"]');
   const targetPageControl = event.target.closest?.("[data-target-page]");
+  const calendarShortcut = event.target.closest?.("[data-calendar-shortcut]");
+  const calendarDayButton = event.target.closest?.("[data-calendar-day]");
+  const calendarNextMonthButton = event.target.closest?.("[data-calendar-next-month]");
+  const detailQuickViewButton = event.target.closest?.("[data-detail-quick-view]");
+  const detailNoteButton = event.target.closest?.("[data-detail-note]");
+  const detailCloseButton = event.target.closest?.("[data-detail-close]");
+  const detailTrigger = event.target.closest?.("[data-detail-kind]");
 
   if (targetPageControl) {
     showPage(targetPageControl.dataset.targetPage);
@@ -1297,6 +1649,74 @@ document.addEventListener("click", (event) => {
     if (profileSheet?.contains(targetPageControl)) {
       setProfileOpen(false);
     }
+
+    if (detailSheet?.contains(targetPageControl)) {
+      setDetailOpen(false);
+    }
+  }
+
+  if (calendarShortcut) {
+    showCalendarView(calendarShortcut.dataset.calendarShortcut);
+  }
+
+  if (detailQuickViewButton) {
+    lastSheetTrigger = detailQuickViewButton;
+    setDetailOpen(false);
+    setSheetOpen(true, detailQuickViewButton.dataset.detailQuickView);
+  }
+
+  if (detailNoteButton) {
+    if (detailNoteButton.dataset.detailAction === "completeShopping" && lastDetailTrigger?.matches("[data-shopping-item]")) {
+      const check = lastDetailTrigger.querySelector(".shopping-check");
+      check?.classList.add("is-done");
+
+      if (check) {
+        check.innerHTML = icon("check");
+      }
+    }
+
+    detailSubtitle.textContent = "Готово";
+    detailBody.textContent = detailNoteButton.dataset.detailNote;
+    detailNoteButton.textContent = "Готово";
+    detailNoteButton.disabled = true;
+    refreshIcons();
+  }
+
+  if (detailCloseButton && detailSheet?.contains(detailCloseButton)) {
+    setDetailOpen(false);
+  }
+
+  if (calendarNextMonthButton) {
+    showDetail(
+      {
+        kind: "date",
+        title: "Сентябрь 2026",
+        subtitle: "Следующий месяц",
+        body: "Навигация по месяцам будет подключена к календарным данным. В прототипе это место показывает будущий сценарий.",
+        icon: "calendar-days",
+        tone: "blue",
+      },
+      calendarNextMonthButton,
+    );
+  }
+
+  if (calendarDayButton) {
+    const group = calendarDayButton.closest(".week-strip, .month-grid");
+    group?.querySelectorAll("[data-calendar-day]").forEach((button) => {
+      button.classList.toggle("is-active", button === calendarDayButton);
+    });
+
+    showDetail(
+      {
+        kind: "date",
+        title: calendarDayButton.dataset.calendarDayLabel,
+        subtitle: `${calendarDayButton.dataset.calendarDayCount || 0} объектов`,
+        body: "Тап по дню выбирает его в текущем виде. Подробный набор событий появится здесь после подключения календарных данных.",
+        icon: "calendar-days",
+        tone: "blue",
+      },
+      calendarDayButton,
+    );
   }
 
   if (dailyPhotoCard) {
@@ -1306,6 +1726,14 @@ document.addEventListener("click", (event) => {
   if (tomorrowCard) {
     showPage("calendar");
     showCalendarView("day");
+  }
+
+  if (birthdaysCard) {
+    showPage("people");
+  }
+
+  if (detailTrigger) {
+    showDetailFromElement(detailTrigger);
   }
 });
 
@@ -1409,12 +1837,46 @@ quickForms.forEach((form) => {
       return;
     }
 
-    const status = form.querySelector(".form-status");
+    if (form.dataset.sheetView === "event") {
+      handleEventSubmit(form);
+      return;
+    }
 
-    if (status) {
-      status.textContent = "Готово. В прототипе это пока не сохраняется в данные.";
+    if (form.dataset.sheetView === "purchase") {
+      handlePurchaseSubmit(form);
     }
   });
+});
+
+document.addEventListener("click", (event) => {
+  const ownerFilterButton = event.target.closest?.("[data-task-owner-filter]");
+  const dateFilterButton = event.target.closest?.("[data-task-date-filter]");
+
+  if (ownerFilterButton) {
+    taskFilters = {
+      ...taskFilters,
+      owner: ownerFilterButton.dataset.taskOwnerFilter,
+    };
+
+    document.querySelectorAll("[data-task-owner-filter]").forEach((button) => {
+      button.classList.toggle("is-active", button === ownerFilterButton);
+    });
+
+    renderDynamicTaskViews();
+  }
+
+  if (dateFilterButton) {
+    taskFilters = {
+      ...taskFilters,
+      date: dateFilterButton.dataset.taskDateFilter,
+    };
+
+    document.querySelectorAll("[data-task-date-filter]").forEach((button) => {
+      button.classList.toggle("is-soft-active", button === dateFilterButton);
+    });
+
+    renderDynamicTaskViews();
+  }
 });
 
 document.addEventListener("change", async (event) => {
@@ -1471,6 +1933,10 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && profileSheet && !profileSheet.hidden) {
     setProfileOpen(false);
   }
+
+  if (event.key === "Escape" && detailSheet && !detailSheet.hidden) {
+    setDetailOpen(false);
+  }
 });
 
 navItems.forEach((item) => {
@@ -1492,10 +1958,15 @@ shoppingTabButtons.forEach((button) => {
 });
 
 window.addEventListener("load", async () => {
+  const savedEvents = readJson(localEventsStorageKey, []);
+  const savedShoppingItems = readJson(localShoppingStorageKey, []);
+  localEvents = Array.isArray(savedEvents) ? savedEvents : [];
+  localShoppingItems = Array.isArray(savedShoppingItems) ? savedShoppingItems : [];
   applyTheme(getSavedTheme());
   applyPersonalData();
   applyNotificationSettings();
   updateAuthUi();
+  renderLocalViews();
   refreshIcons();
   updateDots();
   showCalendarView("week");

@@ -65,7 +65,8 @@
 
 .shopping-group,
 .shopping-category,
-.shopping-list {
+.shopping-list,
+#shoppingGroupsRoot {
   display: grid;
   gap: 10px;
 }
@@ -161,6 +162,7 @@
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.045);
   color: var(--text);
+  font: inherit;
   text-align: left;
   cursor: pointer;
 }

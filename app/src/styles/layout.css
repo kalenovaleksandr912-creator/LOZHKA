@@ -208,7 +208,8 @@
 }
 
 .sheet-backdrop,
-.profile-backdrop {
+.profile-backdrop,
+.detail-backdrop {
   position: fixed;
   inset: 0;
   z-index: 30;
@@ -216,7 +217,8 @@
 }
 
 .quick-sheet,
-.profile-sheet {
+.profile-sheet,
+.detail-sheet {
   position: fixed;
   left: 50%;
   bottom: 0;
@@ -231,6 +233,12 @@
   transform: translateX(-50%);
 }
 
+.detail-sheet {
+  z-index: 43;
+  display: grid;
+  gap: 12px;
+}
+
 .profile-sheet {
   z-index: 42;
   display: grid;
@@ -238,7 +246,9 @@
 }
 
 .profile-sheet[hidden],
-.profile-backdrop[hidden] {
+.profile-backdrop[hidden],
+.detail-sheet[hidden],
+.detail-backdrop[hidden] {
   display: none;
 }
 
@@ -267,6 +277,128 @@
 .quick-sheet h2 {
   font-size: 21px;
   line-height: 1.12;
+}
+
+.detail-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border-radius: 15px;
+  background: var(--soft-fill);
+  color: var(--muted);
+}
+
+.detail-icon svg {
+  width: 21px;
+  height: 21px;
+}
+
+.detail-icon.event,
+.detail-icon.blue {
+  background: var(--blue-soft);
+  color: var(--blue-text);
+}
+
+.detail-icon.task,
+.detail-icon.lavender,
+.detail-icon.shared {
+  background: var(--lavender-soft);
+  color: var(--lavender-text);
+}
+
+.detail-icon.menu,
+.detail-icon.warm {
+  background: var(--peach-soft);
+  color: var(--peach-text);
+}
+
+.detail-icon.shopping,
+.detail-icon.green,
+.detail-icon.products {
+  background: var(--green-soft);
+  color: var(--green-text);
+}
+
+.detail-icon.date,
+.detail-icon.rose,
+.detail-icon.her {
+  background: var(--rose-soft);
+  color: var(--rose-text);
+}
+
+.detail-content {
+  display: grid;
+  gap: 12px;
+}
+
+.detail-subtitle,
+.detail-body {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.42;
+}
+
+.detail-subtitle:empty,
+.detail-body:empty,
+.detail-meta:empty,
+.detail-actions:empty {
+  display: none;
+}
+
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.detail-meta span {
+  min-height: 28px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: var(--soft-fill);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 760;
+  line-height: 1;
+}
+
+.detail-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  padding-top: 2px;
+}
+
+.detail-actions button {
+  min-width: 0;
+  min-height: 46px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--soft-fill);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.detail-actions button.is-primary {
+  background: var(--control-bg);
+  color: var(--control-text);
+  box-shadow: var(--control-shadow);
+}
+
+.detail-actions button:disabled {
+  opacity: 0.72;
+  cursor: default;
+}
+
+.detail-actions button:nth-child(3):last-child {
+  grid-column: 1 / -1;
 }
 
 .quick-sheet-view {

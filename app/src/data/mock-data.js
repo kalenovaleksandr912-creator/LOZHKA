@@ -23,6 +23,7 @@ export const carouselCards = [
     icon: "calendar-days",
   },
   {
+    action: "birthdays",
     tone: "lavender",
     label: "Дни рождения",
     title: "Через 3 дня день рождения Анны",

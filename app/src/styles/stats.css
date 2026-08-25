@@ -72,6 +72,10 @@
   border: 1px solid var(--line);
   border-radius: 20px;
   background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .stat-card div {
@@ -110,6 +114,10 @@
   border: 1px solid var(--line);
   border-radius: 18px;
   background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .stats-bar-item > div:first-child {
@@ -175,6 +183,10 @@
   border: 1px solid var(--line);
   border-radius: 18px;
   background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .person-stat strong {
@@ -205,6 +217,10 @@
   border: 1px solid var(--line);
   border-radius: 18px;
   background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .stats-recent-item > span {

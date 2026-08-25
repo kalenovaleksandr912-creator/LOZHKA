@@ -269,6 +269,10 @@
   gap: 13px;
   align-items: center;
   padding: 14px;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .date-card time {

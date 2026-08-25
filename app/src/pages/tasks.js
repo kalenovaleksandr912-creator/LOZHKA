@@ -1,6 +1,6 @@
-import { tasks as mockTasks } from "../data/mock-data.js?v=20";
-import { escapeHtml, pageShell, sectionTitle } from "../components/html.js?v=20";
-import { toViewTasks } from "../lib/task-view.js?v=20";
+import { tasks as mockTasks } from "../data/mock-data.js?v=21";
+import { escapeHtml, pageShell, sectionTitle } from "../components/html.js?v=21";
+import { toViewTasks } from "../lib/task-view.js?v=21";
 
 const ownerClass = {
   me: "assignee-me",
@@ -49,15 +49,44 @@ function renderTaskSummary(tasks) {
   `;
 }
 
-export function renderTasksBoard(tasks) {
+export function getVisibleTasks(tasks, filters = {}) {
+  const ownerFilter = filters.owner ?? "all";
+  const dateFilter = filters.date ?? "today";
+
+  return tasks.filter((task) => {
+    const ownerMatches = ownerFilter === "all" || task.owner === ownerFilter;
+    const dateMatches =
+      dateFilter === "all" ||
+      (dateFilter === "today" && !task.completed && task.date === "Сегодня") ||
+      (dateFilter === "upcoming" && !task.completed && task.date !== "Сегодня" && task.date !== "Без срока") ||
+      (dateFilter === "no-date" && !task.completed && task.date === "Без срока") ||
+      (dateFilter === "completed" && task.completed);
+
+    return ownerMatches && dateMatches;
+  });
+}
+
+export function getTaskBoardTitle(filters = {}) {
+  const titleByDate = {
+    today: "Сегодня",
+    upcoming: "Предстоящие",
+    "no-date": "Без срока",
+    completed: "Выполненные",
+    all: "Все задачи",
+  };
+
+  return titleByDate[filters.date ?? "today"] ?? "Сегодня и ближайшее";
+}
+
+export function renderTasksBoard(tasks, title = "Сегодня") {
   if (tasks.length === 0) {
     return `
-      ${sectionTitle({ title: "Сегодня и ближайшее" })}
+      ${sectionTitle({ title })}
       <article class="task-card">
         <div class="task-check">
           <span>
             <strong>Задач пока нет</strong>
-            <small>Создай первую через кнопку +</small>
+            <small>Попробуй другой фильтр или создай новую через +</small>
           </span>
         </div>
       </article>
@@ -65,12 +94,15 @@ export function renderTasksBoard(tasks) {
   }
 
   return `
-    ${sectionTitle({ title: "Сегодня и ближайшее" })}
+    ${sectionTitle({ title })}
     ${tasks.map(renderTaskCard).join("")}
   `;
 }
 
 export function renderTasksPage(taskList = initialTasks) {
+  const initialFilters = { owner: "all", date: "today" };
+  const visibleTasks = getVisibleTasks(taskList, initialFilters);
+
   return pageShell(
     "tasks",
     "Задачи",
@@ -80,7 +112,7 @@ export function renderTasksPage(taskList = initialTasks) {
           <p>Рабочий список</p>
           <h1>Задачи</h1>
         </div>
-        <button class="add-button" type="button" aria-label="Создать задачу">
+        <button class="add-button" type="button" aria-label="Создать задачу" data-add-view="task">
           <span aria-hidden="true">+</span>
         </button>
       </section>
@@ -91,27 +123,27 @@ export function renderTasksPage(taskList = initialTasks) {
 
       <section class="filter-block" aria-label="Фильтры задач">
         <div class="chip-row">
-          <button class="chip is-active" type="button">Все</button>
-          <button class="chip" type="button">Александр</button>
-          <button class="chip" type="button">Настя</button>
-          <button class="chip" type="button">Общие</button>
+          <button class="chip is-active" type="button" data-task-owner-filter="all">Все</button>
+          <button class="chip" type="button" data-task-owner-filter="me">Александр</button>
+          <button class="chip" type="button" data-task-owner-filter="her">Настя</button>
+          <button class="chip" type="button" data-task-owner-filter="shared">Общие</button>
         </div>
         <div class="chip-row compact">
-          <button class="chip is-soft-active" type="button">Сегодня</button>
-          <button class="chip" type="button">Предстоящие</button>
-          <button class="chip" type="button">Без срока</button>
-          <button class="chip" type="button">Выполненные</button>
+          <button class="chip is-soft-active" type="button" data-task-date-filter="today">Сегодня</button>
+          <button class="chip" type="button" data-task-date-filter="upcoming">Предстоящие</button>
+          <button class="chip" type="button" data-task-date-filter="no-date">Без срока</button>
+          <button class="chip" type="button" data-task-date-filter="completed">Выполненные</button>
         </div>
       </section>
 
       <section class="task-board" id="tasksBoard" aria-labelledby="activeTasksTitle">
-        ${renderTasksBoard(taskList)}
+        ${renderTasksBoard(visibleTasks, getTaskBoardTitle(initialFilters))}
       </section>
     `,
   );
 }
 
-export function renderTaskViews(tasks) {
+export function renderTaskViews(tasks, visibleTasks = tasks, title = "Сегодня") {
   const summary = document.getElementById("taskSummaryStrip");
   const board = document.getElementById("tasksBoard");
 
@@ -120,6 +152,6 @@ export function renderTaskViews(tasks) {
   }
 
   if (board) {
-    board.innerHTML = renderTasksBoard(tasks);
+    board.innerHTML = renderTasksBoard(visibleTasks, title);
   }
 }

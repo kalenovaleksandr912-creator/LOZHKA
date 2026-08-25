@@ -1,11 +1,17 @@
-import { carouselCards, dailyPhoto, meals, shopping, tasks as mockTasks, today, todayEvents } from "../data/mock-data.js?v=20";
-import { agendaCard, escapeHtml, icon, pageShell } from "../components/html.js?v=20";
-import { toViewTasks } from "../lib/task-view.js?v=20";
+import { carouselCards, dailyPhoto, meals, shopping, tasks as mockTasks, today, todayEvents } from "../data/mock-data.js?v=21";
+import { agendaCard, detailAttrs, escapeHtml, icon, pageShell } from "../components/html.js?v=21";
+import { toViewTasks } from "../lib/task-view.js?v=21";
 
 function todaySectionHeader({ id, title, subtitle, action, actionLabel, targetPage }) {
   const actionControl = targetPage
     ? `<button type="button" data-target-page="${escapeHtml(targetPage)}" aria-label="${escapeHtml(actionLabel ?? action)}">${escapeHtml(action)}</button>`
-    : `<a href="#" aria-label="${escapeHtml(actionLabel ?? action)}">${escapeHtml(action)}</a>`;
+    : `<button type="button" aria-label="${escapeHtml(actionLabel ?? action)}"${detailAttrs({
+        kind: "section",
+        title: action,
+        body: "Этот сценарий будет уточнён после финального ревью прототипа.",
+        icon: "sparkles",
+        tone: "blue",
+      })}>${escapeHtml(action)}</button>`;
 
   return `
     <div class="today-section-heading">
@@ -142,10 +148,16 @@ function renderTodayTasks(tasks = initialTasks) {
 
 function renderEvents() {
   return `
-    <section class="feed-section" aria-labelledby="eventsTitle">
-      ${todaySectionHeader({ id: "eventsTitle", title: "События", subtitle: "2 в календаре", action: "Неделя", actionLabel: "Открыть календарь", targetPage: "calendar" })}
-      ${todayEvents.map((event) => agendaCard({ ...event, kind: "event" })).join("")}
+    <section class="feed-section" id="todayEventsSection" aria-labelledby="eventsTitle">
+      ${renderTodayEventsContent(todayEvents)}
     </section>
+  `;
+}
+
+export function renderTodayEventsContent(events) {
+  return `
+    ${todaySectionHeader({ id: "eventsTitle", title: "События", subtitle: `${events.length} в календаре`, action: "Неделя", actionLabel: "Открыть календарь", targetPage: "calendar" })}
+    ${events.map((event) => agendaCard({ ...event, kind: "event" })).join("")}
   `;
 }
 
@@ -172,19 +184,25 @@ function renderMeals() {
 
 function renderShopping() {
   return `
-    <section class="feed-section shopping-section" aria-labelledby="shoppingTitle">
-      ${todaySectionHeader({ id: "shoppingTitle", title: "Покупки", subtitle: "4 позиции", action: "Список", actionLabel: "Открыть покупки", targetPage: "shopping" })}
-      ${shopping
-        .map(
-          (item) => `
-            <label class="shopping-row">
-              <input type="checkbox"${item.completed ? " checked" : ""} />
-              <span>${escapeHtml(item.title)}</span>
-            </label>
-          `,
-        )
-        .join("")}
+    <section class="feed-section shopping-section" id="todayShoppingSection" aria-labelledby="shoppingTitle">
+      ${renderTodayShoppingContent(shopping)}
     </section>
+  `;
+}
+
+export function renderTodayShoppingContent(items) {
+  return `
+    ${todaySectionHeader({ id: "shoppingTitle", title: "Покупки", subtitle: `${items.length} позиции`, action: "Список", actionLabel: "Открыть покупки", targetPage: "shopping" })}
+    ${items
+      .map(
+        (item) => `
+          <label class="shopping-row">
+            <input type="checkbox"${item.completed ? " checked" : ""} />
+            <span>${escapeHtml(item.title)}</span>
+          </label>
+        `,
+      )
+      .join("")}
   `;
 }
 

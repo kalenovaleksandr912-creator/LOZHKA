@@ -1,5 +1,5 @@
-import { menuCategories } from "../data/mock-data.js?v=20";
-import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=20";
+import { menuCategories } from "../data/mock-data.js?v=21";
+import { detailAttrs, escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=21";
 
 function renderDish(dish) {
   return `
@@ -11,7 +11,14 @@ function renderDish(dish) {
           ${dish.tags.map((tag) => `<em>${escapeHtml(tag)}</em>`).join("")}
         </span>
       </div>
-      <button class="dish-action" type="button" aria-label="Выбрать ${escapeHtml(dish.title)} в календарь">
+      <button class="dish-action" type="button" aria-label="Выбрать ${escapeHtml(dish.title)} в календарь" data-dish-action${detailAttrs({
+        kind: "dish",
+        title: dish.title,
+        subtitle: dish.details,
+        body: `Теги: ${dish.tags.join(", ")}`,
+        icon: "utensils",
+        tone: "menu",
+      })}>
         ${icon("calendar-plus")}
       </button>
     </article>

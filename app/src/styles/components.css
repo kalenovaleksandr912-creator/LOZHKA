@@ -9,17 +9,21 @@
   line-height: 1.16;
 }
 
-.section-title a {
+.section-title a,
+.section-title button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 34px;
   padding: 0 12px;
+  border: 0;
   border-radius: 999px;
   background: var(--surface-2);
   color: var(--muted);
+  font: inherit;
   font-size: 13px;
   font-weight: 700;
+  cursor: pointer;
 }
 
 .agenda-card {
@@ -29,8 +33,13 @@
   align-items: center;
   min-height: 72px;
   padding: 13px;
+  border: 0;
   border-radius: 20px;
   background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .agenda-card time {

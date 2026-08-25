@@ -1,5 +1,5 @@
-import { shoppingLists } from "../data/mock-data.js?v=20";
-import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=20";
+import { shoppingLists } from "../data/mock-data.js?v=21";
+import { detailAttrs, escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=21";
 
 const priorityClass = {
   Срочно: "urgent",
@@ -20,7 +20,14 @@ const categoryMeta = {
 
 function renderShoppingItem(item) {
   return `
-    <button class="shopping-item category-${escapeHtml(item.category)} priority-${priorityClass[item.priority] ?? "normal"}" type="button">
+    <button class="shopping-item category-${escapeHtml(item.category)} priority-${priorityClass[item.priority] ?? "normal"}" type="button" data-shopping-item${detailAttrs({
+      kind: "shopping",
+      title: item.title,
+      subtitle: item.details,
+      body: `${categoryMeta[item.category]?.title ?? "Покупка"} · ${item.owner} · ${item.priority}`,
+      icon: item.category === "products" ? "apple" : "package",
+      tone: item.category,
+    })}>
       <span class="shopping-check${item.completed ? " is-done" : ""}">
         ${item.completed ? icon("check") : ""}
       </span>
@@ -68,7 +75,49 @@ function renderShoppingGroup(group, index) {
   `;
 }
 
-export function renderShoppingPage() {
+export function renderShoppingOverview(lists = shoppingLists) {
+  const allItems = lists.flatMap((group) => group.items);
+  const todayItems = lists.find((group) => group.key === "today")?.items ?? [];
+  const productCount = allItems.filter((item) => item.category === "products").length;
+  const otherCount = allItems.filter((item) => item.category === "other").length;
+
+  return `
+    <article>
+      <span>Сегодня</span>
+      <strong>${todayItems.length}</strong>
+      <small>позиции</small>
+    </article>
+    <article>
+      <span>Продукты</span>
+      <strong>${productCount}</strong>
+      <small>позиций</small>
+    </article>
+    <article>
+      <span>Остальное</span>
+      <strong>${otherCount}</strong>
+      <small>позиций</small>
+    </article>
+  `;
+}
+
+export function renderShoppingGroups(lists = shoppingLists) {
+  return lists.map(renderShoppingGroup).join("");
+}
+
+export function renderShoppingViews(lists = shoppingLists) {
+  const overview = document.getElementById("shoppingOverview");
+  const groupsRoot = document.getElementById("shoppingGroupsRoot");
+
+  if (overview) {
+    overview.innerHTML = renderShoppingOverview(lists);
+  }
+
+  if (groupsRoot) {
+    groupsRoot.innerHTML = renderShoppingGroups(lists);
+  }
+}
+
+export function renderShoppingPage(lists = shoppingLists) {
   return pageShell(
     "shopping",
     "Покупки",
@@ -81,27 +130,13 @@ export function renderShoppingPage() {
           <p>Списки</p>
           <h1>Покупки</h1>
         </div>
-        <button class="add-button" type="button" aria-label="Добавить покупку">
+        <button class="add-button" type="button" aria-label="Добавить покупку" data-add-view="purchase">
           <span aria-hidden="true">+</span>
         </button>
       </section>
 
-      <section class="shopping-overview">
-        <article>
-          <span>Сегодня</span>
-          <strong>6</strong>
-          <small>позиции</small>
-        </article>
-        <article>
-          <span>Продукты</span>
-          <strong>8</strong>
-          <small>позиций</small>
-        </article>
-        <article>
-          <span>Остальное</span>
-          <strong>6</strong>
-          <small>позиций</small>
-        </article>
+      <section class="shopping-overview" id="shoppingOverview">
+        ${renderShoppingOverview(lists)}
       </section>
 
       <div class="shopping-tabs" aria-label="Фильтры покупок">
@@ -110,7 +145,9 @@ export function renderShoppingPage() {
         <button type="button" data-shopping-tab="no-date">Без даты</button>
       </div>
 
-      ${shoppingLists.map(renderShoppingGroup).join("")}
+      <div id="shoppingGroupsRoot">
+        ${renderShoppingGroups(lists)}
+      </div>
     `,
   );
 }

@@ -1,22 +1,36 @@
-import { statsBreakdown, statsOverview, statsPeople, statsRecent } from "../data/mock-data.js?v=20";
-import { escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=20";
+import { statsBreakdown, statsOverview, statsPeople, statsRecent } from "../data/mock-data.js?v=21";
+import { detailAttrs, escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=21";
 
 function renderOverviewCard(item) {
   return `
-    <article class="stat-card">
+    <button class="stat-card" type="button"${detailAttrs({
+      kind: "stat",
+      title: item.label,
+      subtitle: `${item.value} · ${item.details}`,
+      body: "Показатель собирает действия в задачах, календаре, покупках, меню и фото дня.",
+      icon: item.icon,
+      tone: item.tone,
+    })}>
       <span class="row-icon ${escapeHtml(item.tone)}">${icon(item.icon)}</span>
       <div>
         <strong>${escapeHtml(item.value)}</strong>
         <span>${escapeHtml(item.label)}</span>
         <small>${escapeHtml(item.details)}</small>
       </div>
-    </article>
+    </button>
   `;
 }
 
 function renderBreakdownItem(item) {
   return `
-    <article class="stats-bar-item tone-${escapeHtml(item.tone)}">
+    <button class="stats-bar-item tone-${escapeHtml(item.tone)}" type="button"${detailAttrs({
+      kind: "stat",
+      title: item.label,
+      subtitle: `${item.count} операций`,
+      body: `Доля в общей активности за месяц: ${item.percent}%.`,
+      icon: "bar-chart-3",
+      tone: item.tone,
+    })}>
       <div>
         <strong>${escapeHtml(item.label)}</strong>
         <span>${escapeHtml(item.count)} операций</span>
@@ -24,30 +38,44 @@ function renderBreakdownItem(item) {
       <div class="stats-bar" aria-hidden="true">
         <i style="width: ${escapeHtml(item.percent)}%"></i>
       </div>
-    </article>
+    </button>
   `;
 }
 
 function renderPersonStat(item) {
   return `
-    <article class="person-stat tone-${escapeHtml(item.tone)}">
+    <button class="person-stat tone-${escapeHtml(item.tone)}" type="button"${detailAttrs({
+      kind: "stat",
+      title: item.name,
+      subtitle: `${item.value} ${item.details}`,
+      body: "Показывает, кто чаще создавал или закрывал семейные операции.",
+      icon: "user-round-check",
+      tone: item.tone,
+    })}>
       <strong>${escapeHtml(item.value)}</strong>
       <span>${escapeHtml(item.name)}</span>
       <small>${escapeHtml(item.details)}</small>
-    </article>
+    </button>
   `;
 }
 
 function renderRecentItem(item) {
   return `
-    <article class="stats-recent-item">
+    <button class="stats-recent-item" type="button"${detailAttrs({
+      kind: "stat",
+      title: item.title,
+      subtitle: item.value,
+      body: item.details,
+      icon: item.icon,
+      tone: "blue",
+    })}>
       <span>${icon(item.icon)}</span>
       <div>
         <strong>${escapeHtml(item.title)}</strong>
         <small>${escapeHtml(item.details)}</small>
       </div>
       <em>${escapeHtml(item.value)}</em>
-    </article>
+    </button>
   `;
 }
 

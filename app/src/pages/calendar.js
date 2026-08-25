@@ -1,5 +1,5 @@
-import { agenda, calendarWeek, tomorrowAgenda } from "../data/mock-data.js?v=20";
-import { agendaCard, escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=20";
+import { agenda, calendarWeek, tomorrowAgenda } from "../data/mock-data.js?v=21";
+import { agendaCard, escapeHtml, icon, pageShell, sectionTitle } from "../components/html.js?v=21";
 
 function renderWeek() {
   return `
@@ -8,7 +8,7 @@ function renderWeek() {
         ${calendarWeek
           .map(
             (day) => `
-              <button class="${day.active ? "is-active" : ""}" type="button">
+              <button class="${day.active ? "is-active" : ""}" type="button" data-calendar-day="${escapeHtml(day.date)}" data-calendar-day-label="${escapeHtml(day.weekday)} ${escapeHtml(day.date)} августа" data-calendar-day-count="${escapeHtml(day.count)}">
                 <span>${escapeHtml(day.weekday)}</span>
                 <strong>${escapeHtml(day.date)}</strong>
                 <small>${escapeHtml(day.count)}</small>
@@ -19,7 +19,7 @@ function renderWeek() {
       </section>
 
       <section class="calendar-day" aria-labelledby="weekTitle">
-        ${sectionTitle({ eyebrow: "Среда", title: "26 августа", action: "День", actionLabel: "Открыть день" })}
+        ${sectionTitle({ eyebrow: "Среда", title: "26 августа", action: "День", actionLabel: "Открыть день", calendarView: "day" })}
         ${agenda.map(agendaCard).join("")}
       </section>
     </section>
@@ -42,7 +42,7 @@ function renderMonthGrid() {
         .filter(Boolean)
         .join(" ");
       return `
-        <button class="${classes}" type="button">
+        <button class="${classes}" type="button" data-calendar-day="${escapeHtml(date)}" data-calendar-day-label="${escapeHtml(date)} августа" data-calendar-day-count="${escapeHtml(dots)}">
           <strong>${escapeHtml(date)}</strong>
           ${dots ? `<span>${Array.from({ length: dots }, () => "<i></i>").join("")}</span>` : ""}
         </button>
@@ -54,7 +54,7 @@ function renderMonthGrid() {
 function renderMonth() {
   return `
     <section class="calendar-view" data-calendar-view="month" aria-labelledby="monthTitle" hidden>
-      ${sectionTitle({ eyebrow: "Месяц", title: "Август 2026", action: "Дальше", actionLabel: "Следующий месяц" })}
+      ${sectionTitle({ eyebrow: "Месяц", title: "Август 2026", action: "Дальше", actionLabel: "Следующий месяц", attrs: { "data-calendar-next-month": true } })}
       <div class="month-weekdays" aria-hidden="true">
         <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
       </div>
@@ -115,6 +115,7 @@ function renderList() {
   return `
     <section class="calendar-view" data-calendar-view="list" aria-labelledby="listTitle" hidden>
       ${sectionTitle({ eyebrow: "Ближайшее", title: "Список событий" })}
+      <section class="calendar-list-group local-calendar-events" id="calendarLocalEvents" hidden></section>
       ${groups
         .map(
           (group) => `
@@ -139,7 +140,7 @@ export function renderCalendarPage() {
           <p id="calendarModeLabel">Неделя</p>
           <h1>Календарь</h1>
         </div>
-        <button class="add-button" type="button" aria-label="Добавить в календарь">
+        <button class="add-button" type="button" aria-label="Добавить в календарь" data-add-view="event">
           <span aria-hidden="true">+</span>
         </button>
       </section>
