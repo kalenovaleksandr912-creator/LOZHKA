@@ -31,5 +31,17 @@ services:
     ports:
       - "127.0.0.1:4000:4000"
 
+  adminer:
+    image: adminer:4
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: pepa-linha
+    ports:
+      - "127.0.0.1:8080:8080"
+
 volumes:
   postgres-data:
